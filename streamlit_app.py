@@ -14,7 +14,7 @@ def fix_image(upload, position, background_color, text, banner_size):
 
     # 创建 Banner 图片
     banner_image = Image.new('RGBA', banner_size, background_color)
-    banner_image.paste(fixed, position)
+    banner_image.paste(fixed, position, fixed)
 
     # 在 Banner 图片上添加文字
     from PIL import ImageDraw, ImageFont
