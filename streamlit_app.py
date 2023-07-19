@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from PIL import Image
-
+import streamlit as st
 
 def remove_background(image, threshold):
     # 将图像转换为OpenCV的BGR格式
