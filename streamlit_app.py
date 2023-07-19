@@ -15,11 +15,11 @@ def remove_background(image, threshold):
 
     # 使用形态学操作进行背景去除
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-
+    _mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+    
     # 将图像转换为PIL格式
     result = Image.fromarray(cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB))
-    result.putalpha(128)
+    result.putalpha(_mask)
 
     return result
 
