@@ -3,29 +3,27 @@ from PIL import Image
 from PIL import ImageOps
 from io import BytesIO
 import base64
+import cv2
+import numpy as np
 
 def remove_background(image):
-    # 在這裡添加你的去背景程式碼
-    # 這個函數應該接受一個圖片作為輸入，並返回一個去除背景的圖片
-    # 這裡只是一個示例，你需要使用你自己的去背景方法
-    inverted_image = ImageOps.invert(image)
-    return inverted_image
+    # 將圖像轉換為 NumPy 數組
+    np_image = np.array(image)
 
-def resize_image(image, max_width, max_height):
-    width, height = image.size
-    aspect_ratio = width / height
+    # 定義背景顏色（紅色）的閾值範圍
+    lower_threshold = np.array([200, 0, 0], dtype=np.uint8)
+    upper_threshold = np.array([255, 100, 100], dtype=np.uint8)
 
-    if width > max_width:
-        new_width = max_width
-        new_height = int(new_width / aspect_ratio)
-        image = image.resize((new_width, new_height))
+    # 創建遮罩，將背景顏色標記為白色（255），前景顏色標記為黑色（0）
+    mask = cv2.inRange(np_image, lower_threshold, upper_threshold)
 
-    if height > max_height:
-        new_height = max_height
-        new_width = int(new_height * aspect_ratio)
-        image = image.resize((new_width, new_height))
+    # 將遮罩應用於原始圖像，保留前景區域
+    foreground = cv2.bitwise_and(np_image, np_image, mask=mask)
 
-    return image
+    # 將前景圖像轉換回 PIL 圖像
+    foreground_image = Image.fromarray(foreground)
+
+    return foreground_image
 
 def generate_banner(image, position, background_color, text):
     # 在指定的位置繪製圖片
@@ -33,8 +31,6 @@ def generate_banner(image, position, background_color, text):
     banner_image.paste(image, position)
 
     # 在圖片上繪製文字
-    # 這裡只是一個示例，你可以根據需要自定義文字的字體、大小等
-    # 你也可以更改文字的位置和顏色
     from PIL import ImageDraw, ImageFont
     draw = ImageDraw.Draw(banner_image)
     font = ImageFont.truetype("Pixels.ttf", 24)
@@ -55,13 +51,10 @@ def main():
         # 移除圖片背景
         removed_background = remove_background(image)
 
-        # 縮放圖片至 Banner 尺寸並保持比例
-        max_width = 500
-        max_height = 200
-        resized_image = resize_image(removed_background, max_width, max_height)
-
         # 指定圖片位置
-        position = (50, 0)
+        position_x = st.slider("圖片位置 (X)", 0, 500, 100)
+        position_y = st.slider("圖片位置 (Y)", 0, 200, 50)
+        position = (position_x, position_y)
 
         # 指定背景顏色
         background_color = st.color_picker("選擇背景顏色", "#ffffff")
@@ -70,7 +63,7 @@ def main():
         text = st.text_input("輸入Banner文字")
 
         # 生成Banner圖片
-        banner_image = generate_banner(resized_image, position, background_color, text)
+        banner_image = generate_banner(removed_background, position, background_color, text)
 
         # 顯示Banner圖片
         st.image(banner_image)
