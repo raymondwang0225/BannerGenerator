@@ -31,7 +31,8 @@ def process_image(image, color_tolerance):
     cv2.drawContours(new_mask, [max_contour], 0, (255), -1)
     
     # 将新的掩码应用于图像，将最大连通区域以外的像素设置为透明
-    image[new_mask == 0] = [0, 0, 0, 0]  # 设置透明像素的颜色
+    image[np.where(new_mask == 0)] = [0, 0, 0, 0]  # 设置透明像素的颜色
+
 
 
     
