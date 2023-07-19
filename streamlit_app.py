@@ -20,7 +20,8 @@ def process_image(image, color_tolerance):
     mask = cv2.inRange(hsv_image, lower_color, upper_color)
 
     # 计算掩码中最大连通区域的面积和位置
-    _, contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
     max_contour = max(contours, key=cv2.contourArea)
     _, _, width, height = cv2.boundingRect(max_contour)
     max_area = width * height
