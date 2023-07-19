@@ -20,12 +20,14 @@ def remove_background(image, threshold):
     # 绘制物体轮廓到掩码图像
     cv2.drawContours(mask, contours, -1, (255, 255, 255), thickness=cv2.FILLED)
 
-    # 将掩码图像转换为灰度图像
-    mask_gray = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+    # 反转掩码图像，使主体区域为黑色，背景区域为白色
+    mask = cv2.bitwise_not(mask)
 
-    # 将掩码图像的灰度值作为透明度，将图像转换为带有透明通道的RGBA格式
+    # 将图像转换为带有透明通道的RGBA格式
     result = cv2.cvtColor(image, cv2.COLOR_BGR2RGBA)
-    result[:, :, 3] = mask_gray
+
+    # 使用掩码图像将背景区域设为透明
+    result[mask != 0] = [0, 0, 0, 0]
 
     return result
 
@@ -45,7 +47,7 @@ def main():
         cv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
         # 指定背景去除的阈值
-        threshold = st.slider("背景去除强度", 0, 255, 100)
+        threshold = st.slider("背景去除阈值", 0, 255, 160)
 
         # 进行背景去除
         removed_background = remove_background(cv_image, threshold)
