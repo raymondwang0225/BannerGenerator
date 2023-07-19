@@ -20,7 +20,12 @@ def generate_banner(image, position, background_color, text):
     # 你也可以更改文字的位置和顏色
     from PIL import ImageDraw, ImageFont
     draw = ImageDraw.Draw(banner_image)
-    font = ImageFont.truetype("arial.ttf", 24)
+
+    # 讀取字體文件
+    with open("Pixels.ttf", "rb") as f:
+        font_data = f.read()
+    
+    font = ImageFont.truetype(BytesIO(font_data), 24)
     draw.text((50, 50), text, fill="white", font=font)
 
     return banner_image
