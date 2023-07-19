@@ -6,21 +6,14 @@ import base64
 import numpy as np
 
 
-def convert_image(img):
-    buf = BytesIO()
-    img.save(buf, format="PNG")
-    byte_im = buf.getvalue()
-    return byte_im
-
 def fix_image(upload, position, background_color, text):
-    # 去除图片背景
-    with st.spinner('正在去除背景...'):
-        image_data = convert_image(upload)
-        result = remove(image_data)
+    image = Image.open(upload)
+    fixed = remove(image)
+   
 
     # 创建 Banner 图片
     banner_image = Image.new('RGBA', (500, 200), background_color)
-    banner_image.paste(Image.open(BytesIO(result)), position)
+    banner_image.paste(fixed, position)
     
     # 在 Banner 图片上添加文字
     from PIL import ImageDraw, ImageFont
