@@ -5,18 +5,18 @@ from io import BytesIO
 import base64
 from PIL import ImageDraw, ImageFont
 
-def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position):
+def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_foreground_threshold, alpha_matting_background_threshold, alpha_matting_erode_size):
     image = Image.open(upload)
-    fixed = remove(image, alpha_matting=True, alpha_matting_foreground_threshold=270,alpha_matting_background_threshold=20, alpha_matting_erode_size=11)
+    fixed = remove(image, alpha_matting=True, alpha_matting_foreground_threshold=alpha_matting_foreground_threshold, alpha_matting_background_threshold=alpha_matting_background_threshold, alpha_matting_erode_size=alpha_matting_erode_size)
 
-    # 缩放fixed图像至banner尺寸并保持比例
+    # 縮放fixed圖像至banner尺寸並保持比例
     fixed.thumbnail(banner_size)
 
-    # 创建 Banner 图片
+    # 創建 Banner 圖片
     banner_image = Image.new('RGBA', banner_size, background_color)
     banner_image.paste(fixed, position, fixed)
 
-    # 在 Banner 图片上添加文字
+    # 在 Banner 圖片上添加文字
     draw = ImageDraw.Draw(banner_image)
     font = ImageFont.truetype("Pixels.ttf", text_size)
     text_width, text_height = draw.textsize(text, font=font)
@@ -48,15 +48,15 @@ def main():
         col1, col2,col3 = st.columns(3,gap="large")
         with col1:
             st.subheader("Banner")
-            # 指定背景颜色
+            # 指定背景顏色
             background_color = st.color_picker("Choose Background Color", "#ffffff")
-            # 指定图片位置
+            # 指定圖片位置
             banner_width = st.slider("Banner Width", 100, 1000, 500)
             banner_height = st.slider("Banner Height", 100, 1000, 200)
             
         with col2:
             st.subheader("Image")
-            # 根据banner_size调整position的最大值和最小值
+            # 根據banner_size調整position的最大值和最小值
             position_x = st.slider("Image Position(X)", -banner_height, banner_width, 100)
             position_y = st.slider("Image Position(Y)", -banner_height, banner_height, 50)
             position = (position_x, -position_y)
@@ -65,7 +65,7 @@ def main():
             st.subheader("Text")
             # 指定Banner文字
             text = st.text_input("Input Banner Text")
-             # 指定Banner文字颜色
+             # 指定Banner文字顏色
             text_color = st.color_picker("Text Color", "#000000")
 
             # 指定Banner文字大小
@@ -79,17 +79,22 @@ def main():
         # 指定Banner尺寸
         banner_size = (banner_width, banner_height)
 
-        # 生成Banner图片
-        banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position)
+        # 調整透明度分割的相關參數
+        alpha_matting_foreground_threshold = st.slider("Foreground Threshold", 0, 255, 270)
+        alpha_matting_background_threshold = st.slider("Background Threshold", 0, 255, 20)
+        alpha_matting_erode_size = st.slider("Erode Size", 0, 50, 11)
 
-        # 显示Banner图片
+        # 生成Banner圖片
+        banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_foreground_threshold, alpha_matting_background_threshold, alpha_matting_erode_size)
+
+        # 顯示Banner圖片
         st.image(banner_image)
 
-        # 下载完成的图片
+        # 下載完成的圖片
         buffered = BytesIO()
         banner_image.save(buffered, format="PNG")
         img_str = base64.b64encode(buffered.getvalue()).decode()
-        href = f'<a href="data:file/png;base64,{img_str}" download="banner.png">点击下载</a>'
+        href = f'<a href="data:file/png;base64,{img_str}" download="banner.png">Click to Download</a>'
         st.markdown(href, unsafe_allow_html=True)
 
 
