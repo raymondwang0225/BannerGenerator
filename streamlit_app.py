@@ -4,39 +4,63 @@ from PIL import Image
 from io import BytesIO
 import base64
 
-st.set_page_config(layout="wide", page_title="图片背景移除")
-
-st.write("## 从图片移除背景")
-st.write(
-    ":dog: 请上传一张图片，去除背景后图片可在侧边栏下载. :grin:"
-)
-st.sidebar.write("## 上传和下载 :gear:")
-
-
-# Download the fixed image
 def convert_image(img):
     buf = BytesIO()
     img.save(buf, format="PNG")
     byte_im = buf.getvalue()
     return byte_im
 
-
-def fix_image(upload):
+def fix_image(upload, position, background_color, text):
     image = Image.open(upload)
-    col1.write("原图片 :camera:")
-    col1.image(image)
+    resized_image = image.resize((500, 200))
+    
+    # 去除图片背景
+    with st.spinner('正在去除背景...'):
+        image_data = convert_image(resized_image)
+        result = remove(image_data)
 
-    fixed = remove(image)
-    col2.write("处理后 :wrench:")
-    col2.image(fixed)
-    st.sidebar.markdown("\n")
-    st.sidebar.download_button("下载图片", convert_image(fixed), "fixed.png", "image/png")
+    # 创建 Banner 图片
+    banner_image = Image.open(BytesIO(result)).convert("RGBA")
+    banner_image.paste(resized_image, (position[0], position[1]))
+    
+    # 在 Banner 图片上添加文字
+    from PIL import ImageDraw, ImageFont
+    draw = ImageDraw.Draw(banner_image)
+    font = ImageFont.truetype("Pixels.ttf", 24)
+    draw.text((50, 50), text, fill="white", font=font)
 
+    return banner_image
 
-col1, col2 = st.columns(2)
-my_upload = st.sidebar.file_uploader("上传图片", type=["png", "jpg", "jpeg"])
+# Streamlit App
+def main():
+    st.title("Banner Generator")
 
-if my_upload is not None:
-    fix_image(upload=my_upload)
-else:
-    fix_image("./zebra.jpg")
+    uploaded_file = st.file_uploader("上传图片", type=['jpg', 'jpeg', 'png'])
+
+    if uploaded_file is not None:
+        # 指定图片位置
+        position_x = st.slider("图片位置 (X)", 0, 500, 100)
+        position_y = st.slider("图片位置 (Y)", 0, 200, 50)
+        position = (position_x, position_y)
+
+        # 指定背景颜色
+        background_color = st.color_picker("选择背景颜色", "#ffffff")
+
+        # 指定Banner文字
+        text = st.text_input("输入Banner文字")
+
+        # 生成Banner图片
+        banner_image = fix_image(uploaded_file, position, background_color, text)
+
+        # 显示Banner图片
+        st.image(banner_image)
+
+        # 下载完成的图片
+        buffered = BytesIO()
+        banner_image.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+        href = f'<a href="data:file/png;base64,{img_str}" download="banner.png">点击下载</a>'
+        st.markdown(href, unsafe_allow_html=True)
+
+if __name__ == "__main__":
+    main()
