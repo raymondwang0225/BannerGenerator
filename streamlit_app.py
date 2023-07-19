@@ -50,7 +50,7 @@ def main():
     uploaded_file = st.file_uploader("選擇一張圖片", type=["jpg", "jpeg", "png"])
     
     # 容忍度滑桿
-    tolerance = st.slider("容忍度", min_value=0, max_value=50, value=10)
+    tolerance = st.slider("容忍度", min_value=0, max_value=500, value=10)
     
     if uploaded_file is not None:
         # 讀取上傳的圖片
