@@ -33,8 +33,16 @@ def main():
 
     if uploaded_file is not None:
         # 指定图片位置
-        position_x = st.slider("图片位置 (X)", 0, 500, 100)
-        position_y = st.slider("图片位置 (Y)", 0, 200, 50)
+        banner_width = st.slider("Banner宽度", 100, 1000, 500)
+        banner_height = st.slider("Banner高度", 100, 1000, 200)
+
+        # 根据banner_size调整position的最大值和最小值
+        position_max = min(banner_width, banner_height)
+        position_min = -position_max
+
+        position_x = st.slider("图片位置 (X)", position_min, position_max, 100)
+        position_y = st.slider("图片位置 (Y)", position_min, position_max, 50)
+
         position = (position_x, position_y)
 
         # 指定背景颜色
@@ -44,8 +52,6 @@ def main():
         text = st.text_input("输入Banner文字")
 
         # 指定Banner尺寸
-        banner_width = st.slider("Banner宽度", 100, 1000, 500)
-        banner_height = st.slider("Banner高度", 100, 1000, 200)
         banner_size = (banner_width, banner_height)
 
         # 生成Banner图片
