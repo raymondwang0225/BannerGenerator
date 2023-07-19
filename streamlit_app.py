@@ -23,9 +23,19 @@ def remove_background(image_data, threshold):
 
     # 将图像转换为PIL格式，并转换为RGBA模式
     result = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB)).convert("RGBA")
-    result.putalpha(mask)
+
+    # 将mask数组转换为uint8类型，以便与PIL图像的数据类型兼容
+    mask = np.uint8(mask)
+
+    # 创建一个与result图像大小相同的全黑图像
+    alpha = Image.new("L", result.size, 0)
+    alpha.putdata(mask.ravel())
+
+    # 将alpha通道应用到result图像上
+    result.putalpha(alpha)
 
     return result
+
 
 
 # Streamlit App
