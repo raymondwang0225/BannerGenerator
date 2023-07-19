@@ -15,10 +15,10 @@ def remove_background(image, threshold):
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # 创建一个掩码图像，用于绘制物体轮廓
-    mask = np.zeros_like(image)
+    mask = np.zeros(image.shape[:2], dtype=np.uint8)
 
     # 绘制物体轮廓到掩码图像
-    cv2.drawContours(mask, contours, -1, (255, 255, 255), thickness=cv2.FILLED)
+    cv2.drawContours(mask, contours, -1, 255, thickness=cv2.FILLED)
 
     # 反转掩码图像，使主体区域为黑色，背景区域为白色
     mask = cv2.bitwise_not(mask)
@@ -27,7 +27,7 @@ def remove_background(image, threshold):
     result = cv2.cvtColor(image, cv2.COLOR_BGR2RGBA)
 
     # 使用掩码图像将背景区域设为透明
-    result[mask != 0] = [0, 0, 0, 0]
+    result[mask == 255] = [0, 0, 0, 0]
 
     return result
 
