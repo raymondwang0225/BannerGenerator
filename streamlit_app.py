@@ -8,32 +8,52 @@ import cv2
 import numpy as np
 
 
-def bgremove3(myimage):
-    # BG Remover 3
-    myimage_hsv = cv2.cvtColor(myimage, cv2.COLOR_BGR2HSV)
-     
-    #Take S and remove any value that is less than half
-    s = myimage_hsv[:,:,1]
-    s = np.where(s < 127, 0, 1) # Any value below 127 will be excluded
- 
-    # We increase the brightness of the image and then mod by 255
-    v = (myimage_hsv[:,:,2] + 127) % 255
-    v = np.where(v > 127, 1, 0)  # Any value above 127 will be part of our mask
- 
-    # Combine our two masks based on S and V into a single "Foreground"
-    foreground = np.where(s+v > 0, 1, 0).astype(np.uint8)  #Casting back into 8bit integer
- 
-    background = np.where(foreground==0,255,0).astype(np.uint8) # Invert foreground to get background in uint8
-    background = cv2.cvtColor(background, cv2.COLOR_GRAY2BGR)  # Convert background back into BGR space
-    foreground=cv2.bitwise_and(myimage,myimage,mask=foreground) # Apply our foreground map to original image
-    finalimage = background+foreground # Combine foreground and background
- 
-    return finalimage
+def process_license_image(image_path):
+    # 读取图像
+    img = cv2.imread(image_path)
+    hh, ww = img.shape[:2]
+
+    # 剪切掉周围的3个像素以去除外部白色边框
+    img = img[3:hh-3, 3:ww-3]
+
+    # 在周围添加3个黑色像素，并添加额外的10个像素作为后续形态学处理的缓冲区
+    img = cv2.copyMakeBorder(img, 13, 13, 13, 13, cv2.BORDER_CONSTANT, (0, 0, 0))
+
+    # 将图像转换为灰度图像
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # 二值化处理
+    thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY)[1]
+
+    # 应用形态学操作以去除小的黑色斑点
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+    thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+    hh2, ww2 = thresh.shape[:2]
+
+    # 剪切掉周围的10个像素
+    thresh = thresh[10:hh2-10, 10:ww2-10]
+
+    # 获取最大的外轮廓
+    cnts = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+    big_contour = max(cnts, key=cv2.contourArea)
+
+    # 在黑色背景上绘制填充的轮廓
+    mask = np.zeros_like(thresh)
+    cv2.drawContours(mask, [big_contour], -1, (255), cv2.FILLED)
+
+    # 使用遮罩将阈值化的许可证外部变为白色
+    result = thresh.copy()
+    result[mask == 0] = 255
+
+    # 返回处理结果
+    return thresh, mask, result
 
 
 def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position):
-    image = Image.open(upload)
-    fixed = bgremove3(image)
+    #image = Image.open(upload)
+    thresh_image, mask_image, result_image = process_license_image(upload)
+    fixed = result_image
 
     # 缩放fixed图像至banner尺寸并保持比例
     fixed.thumbnail(banner_size)
