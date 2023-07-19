@@ -15,16 +15,26 @@ def remove_background(image, threshold):
 
     # 使用形态学操作进行背景去除
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    _mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-    
-    # 将图像转换为PIL格式
-    result = Image.fromarray(cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB))
-    result.putalpha(_mask)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+
+    # 创建带有透明通道的图像
+    result = Image.fromarray(cv_image)
+    result = result.convert("RGBA")
+    result_data = result.getdata()
+
+    new_data = []
+    for item in result_data:
+        # 将白色像素替换为透明像素
+        if item[:3] == (255, 255, 255):
+            new_data.append((255, 255, 255, 0))
+        else:
+            new_data.append(item)
+
+    result.putdata(new_data)
 
     return result
 
 
-# Streamlit App
 def main():
     st.title("背景去除")
 
