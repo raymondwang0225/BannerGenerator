@@ -14,7 +14,7 @@ def process_image(image):
     
     # 將該顏色設置為透明
     mask = np.all(image == max_color, axis=2)
-    image[mask] = [0, 0, 0, 0]
+    image = np.where(mask[..., None], [0, 0, 0, 0], image)
     
     # 將圖片轉換為RGBA格式
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGBA)
@@ -29,7 +29,7 @@ def main():
     
     if uploaded_file is not None:
         # 讀取上傳的圖片
-        image = np.array(cv2.imdecode(np.fromstring(uploaded_file.read(), np.uint8), 1))
+        image = np.array(cv2.imdecode(np.frombuffer(uploaded_file.read(), np.uint8), 1))
         
         # 顯示原始圖片
         st.image(image, caption="原始圖片", use_column_width=True)
