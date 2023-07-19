@@ -11,6 +11,22 @@ def remove_background(image):
     inverted_image = ImageOps.invert(image)
     return inverted_image
 
+def resize_image(image, max_width, max_height):
+    width, height = image.size
+    aspect_ratio = width / height
+
+    if width > max_width:
+        new_width = max_width
+        new_height = int(new_width / aspect_ratio)
+        image = image.resize((new_width, new_height))
+
+    if height > max_height:
+        new_height = max_height
+        new_width = int(new_height * aspect_ratio)
+        image = image.resize((new_width, new_height))
+
+    return image
+
 def generate_banner(image, position, background_color, text):
     # 在指定的位置繪製圖片
     banner_image = Image.new('RGB', (500, 200), background_color)
@@ -21,12 +37,7 @@ def generate_banner(image, position, background_color, text):
     # 你也可以更改文字的位置和顏色
     from PIL import ImageDraw, ImageFont
     draw = ImageDraw.Draw(banner_image)
-
-    # 讀取字體文件
-    with open("Pixels.ttf", "rb") as f:
-        font_data = f.read()
-    
-    font = ImageFont.truetype(BytesIO(font_data), 24)
+    font = ImageFont.truetype("arial.ttf", 24)
     draw.text((50, 50), text, fill="white", font=font)
 
     return banner_image
@@ -44,8 +55,13 @@ def main():
         # 移除圖片背景
         removed_background = remove_background(image)
 
+        # 縮放圖片至 Banner 尺寸並保持比例
+        max_width = 500
+        max_height = 200
+        resized_image = resize_image(removed_background, max_width, max_height)
+
         # 指定圖片位置
-        position = (100, 50)
+        position = (50, 0)
 
         # 指定背景顏色
         background_color = st.color_picker("選擇背景顏色", "#ffffff")
@@ -54,7 +70,7 @@ def main():
         text = st.text_input("輸入Banner文字")
 
         # 生成Banner圖片
-        banner_image = generate_banner(removed_background, position, background_color, text)
+        banner_image = generate_banner(resized_image, position, background_color, text)
 
         # 顯示Banner圖片
         st.image(banner_image)
