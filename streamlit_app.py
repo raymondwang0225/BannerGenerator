@@ -23,7 +23,7 @@ def fix_image(upload, position, background_color, text):
     # 在 Banner 图片上添加文字
     from PIL import ImageDraw, ImageFont
     draw = ImageDraw.Draw(banner_image)
-    font = ImageFont.truetype("arial.ttf", 24)
+    font = ImageFont.truetype("Pixels.ttf", 24)
     draw.text((50, 50), text, fill="white", font=font)
 
     return banner_image
