@@ -4,43 +4,31 @@ import streamlit as st
 from PIL import Image
 
 
-def find_largest_color_region(image):
-    # 将图像转换为HSV颜色空间
-    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+def remove_background(image):
+    # 将图像转换为灰度图像
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # 计算颜色直方图
-    hist = cv2.calcHist([hsv_image], [0, 1], None, [180, 256], [0, 180, 0, 256])
+    # 使用阈值处理将图像转换为二值图像
+    _, thresh = cv2.threshold(gray, 1, 255, cv2.THRESH_BINARY)
 
-    # 寻找最大直方图值对应的颜色
-    h, s = np.unravel_index(np.argmax(hist), hist.shape)[:2]
+    # 寻找轮廓
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # 返回最大区域的颜色（HSV值）
-    return h, s
+    # 创建一个掩码图像，用于绘制物体轮廓
+    mask = np.zeros_like(image)
 
+    # 绘制物体轮廓到掩码图像
+    cv2.drawContours(mask, contours, -1, (255, 255, 255), thickness=cv2.FILLED)
 
-def remove_background(image, threshold):
-    # 将图像转换为HSV颜色空间
-    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-
-    # 获取最大区域的颜色（背景颜色）
-    h, s = find_largest_color_region(hsv_image)
-
-    # 设定颜色范围
-    lower_color = np.array([h - threshold, 0, 0])
-    upper_color = np.array([h + threshold, 255, 255])
-
-    # 创建颜色遮罩
-    mask = cv2.inRange(hsv_image, lower_color, upper_color)
-
-    # 对原始图像应用颜色遮罩
-    result = cv2.bitwise_and(image, image, mask=mask)
+    # 使用掩码图像将背景置为白色
+    result = cv2.bitwise_and(image, mask)
 
     return result
 
 
 # Streamlit App
 def main():
-    st.title("背景去除")
+    st.title("物体轮廓提取和背景去除")
 
     # 上传图像
     uploaded_file = st.file_uploader("上传图像", type=['jpg', 'jpeg', 'png'])
@@ -49,14 +37,11 @@ def main():
         # 读取上传的图像
         image = Image.open(uploaded_file)
 
-        # 指定背景去除的阈值
-        threshold = st.slider("背景去除强度", 0, 50, 10)
-
         # 将图像转换为OpenCV的BGR格式
         cv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
         # 进行背景去除
-        removed_background = remove_background(cv_image, threshold)
+        removed_background = remove_background(cv_image)
 
         # 将去除背景后的图像转换为PIL格式
         result_image = Image.fromarray(cv2.cvtColor(removed_background, cv2.COLOR_BGR2RGB))
