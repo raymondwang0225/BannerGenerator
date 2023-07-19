@@ -18,10 +18,14 @@ def remove_background(image):
     mask = np.zeros_like(image)
 
     # 绘制物体轮廓到掩码图像
-    cv2.drawContours(mask, contours, -1, (255, 255, 255), thickness=cv2.FILLED)
+    cv2.fillPoly(mask, contours, (255, 255, 255))
 
-    # 使用掩码图像将背景置为白色
-    result = cv2.bitwise_and(image, mask)
+    # 将掩码图像转换为灰度图像
+    mask_gray = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+
+    # 将掩码图像的灰度值作为透明度，将图像转换为带有透明通道的RGBA格式
+    result = cv2.cvtColor(image, cv2.COLOR_BGR2RGBA)
+    result[:, :, 3] = mask_gray
 
     return result
 
@@ -44,7 +48,7 @@ def main():
         removed_background = remove_background(cv_image)
 
         # 将去除背景后的图像转换为PIL格式
-        result_image = Image.fromarray(cv2.cvtColor(removed_background, cv2.COLOR_BGR2RGB))
+        result_image = Image.fromarray(removed_background)
 
         # 显示去除背景后的图像
         st.subheader("去除背景后的图像")
