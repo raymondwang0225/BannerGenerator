@@ -6,9 +6,10 @@ import base64
 import streamlit as st
 
 
-def remove_background(image_path, threshold):
-    # 读取图像
-    img = cv2.imread(image_path)
+def remove_background(image_data, threshold):
+    # 将图像数据转换为OpenCV的BGR格式
+    img_array = np.array(image_data)
+    img = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
 
     # 将图像转换为灰度图像
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -35,14 +36,17 @@ def main():
     uploaded_file = st.file_uploader("上传图像", type=['jpg', 'jpeg', 'png'])
 
     if uploaded_file is not None:
-        # 读取上传的图像
-        image = Image.open(uploaded_file)
+        # 读取上传的图像数据
+        image_data = uploaded_file.getvalue()
+
+        # 将图像数据转换为PIL图像
+        image = Image.open(BytesIO(image_data))
 
         # 指定背景去除的阈值
         threshold = st.slider("背景去除强度", 0, 255, 100)
 
         # 进行背景去除
-        removed_background = remove_background(np.array(image), threshold)
+        removed_background = remove_background(image, threshold)
 
         # 显示去除背景后的图像
         st.subheader("去除背景后的图像")
