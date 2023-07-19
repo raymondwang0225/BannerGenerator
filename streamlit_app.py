@@ -16,23 +16,27 @@ def remove_background(image):
 
     # 生成遮罩，將邊緣區域標記為白色（255），背景區域標記為黑色（0）
     mask = np.zeros_like(grayscale_image)
-    mask[edges] = 255
+    mask[edges] = 1
 
     # 將遮罩應用於原始圖像，保留前景區域
     foreground = image.copy()
-    foreground[mask == 0] = 0
+    foreground[np.logical_not(mask)] = 0
 
     return foreground
 
 def generate_banner(image, position, background_color, text):
     # 在指定的位置繪製圖片
     banner_image = Image.new('RGB', (500, 200), background_color)
-    banner_image.paste(image, position)
+
+    # 縮放圖片並保持比例
+    resized_image = ImageOps.contain(image, (500, 200))
+
+    banner_image.paste(resized_image, position)
 
     # 在圖片上繪製文字
     from PIL import ImageDraw, ImageFont
     draw = ImageDraw.Draw(banner_image)
-    font = ImageFont.truetype("arial.ttf", 24)
+    font = ImageFont.truetype("Pixels.ttf", 24)
     draw.text((50, 50), text, fill="white", font=font)
 
     return banner_image
