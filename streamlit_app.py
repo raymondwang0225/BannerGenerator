@@ -1,6 +1,7 @@
 import streamlit as st
 import cv2
 import numpy as np
+from rembg import remove
 
 def process_image(image):
     # 將圖片轉換為RGBA格式
@@ -34,7 +35,7 @@ def main():
         
         # 處理圖片
         processed_image = process_image(image)
-        
+        processed_image = remove(processed_image)
         # 顯示處理後的圖片
         st.image(processed_image, caption="處理後的圖片", use_column_width=True)
 
