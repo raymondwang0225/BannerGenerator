@@ -3,27 +3,27 @@ from PIL import Image
 from PIL import ImageOps
 from io import BytesIO
 import base64
-import cv2
+from skimage import color, data, restoration
 import numpy as np
 
 def remove_background(image):
-    # 將圖像轉換為 NumPy 數組
-    np_image = np.array(image)
+    # 將圖像轉換為灰度圖像
+    grayscale_image = color.rgb2gray(image)
 
-    # 定義背景顏色（紅色）的閾值範圍
-    lower_threshold = np.array([200, 0, 0], dtype=np.uint8)
-    upper_threshold = np.array([255, 100, 100], dtype=np.uint8)
+    # 使用scikit-image中的邊緣檢測算法（例如Canny或Sobel）進行背景去除
+    # 根據圖像的特點，你可以選擇合適的邊緣檢測算法
+    # 這裡使用了Canny邊緣檢測算法作為示例
+    edges = feature.canny(grayscale_image)
 
-    # 創建遮罩，將背景顏色標記為白色（255），前景顏色標記為黑色（0）
-    mask = cv2.inRange(np_image, lower_threshold, upper_threshold)
+    # 生成遮罩，將邊緣區域標記為白色（255），背景區域標記為黑色（0）
+    mask = np.zeros_like(grayscale_image)
+    mask[edges] = 255
 
     # 將遮罩應用於原始圖像，保留前景區域
-    foreground = cv2.bitwise_and(np_image, np_image, mask=mask)
+    foreground = image.copy()
+    foreground[mask == 0] = 0
 
-    # 將前景圖像轉換回 PIL 圖像
-    foreground_image = Image.fromarray(foreground)
-
-    return foreground_image
+    return foreground
 
 def generate_banner(image, position, background_color, text):
     # 在指定的位置繪製圖片
