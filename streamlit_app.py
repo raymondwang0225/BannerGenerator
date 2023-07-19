@@ -2,7 +2,7 @@ import cv2
 import streamlit as st
 import numpy as np
 from PIL import Image
-
+from rembg import remove
 
 def brighten_image(image, amount):
     img_bright = cv2.convertScaleAbs(image, beta=amount)
@@ -43,7 +43,7 @@ def main_loop():
 
     st.text("Original Image vs Processed Image")
     st.image([original_image, processed_image])
-
+    st.image(remove(processed_image))
 
 if __name__ == '__main__':
     main_loop()
