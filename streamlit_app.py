@@ -15,16 +15,20 @@ def process_image(image, tolerance):
     # 找到圖像中的輪廓
     contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
-    # 找到區域面積最大的輪廓
+    # 找到面積最大的輪廓
     max_contour = max(contours, key=cv2.contourArea)
     
     # 創建一個與原始圖像相同大小的遮罩
     mask = np.zeros(image.shape[:2], dtype=np.uint8)
     
-    # 在遮罩上繪製區域面積最大的輪廓
+    # 在遮罩上繪製面積最大的輪廓
     cv2.drawContours(mask, [max_contour], -1, 255, thickness=cv2.FILLED)
     
-    # 應用遮罩以僅保留區域面積最大的區域
+    # 使用形態學操作對遮罩進行膨脹，填充輪廓周圍的區域
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (9, 9))
+    mask = cv2.dilate(mask, kernel)
+    
+    # 應用遮罩以僅保留面積最大的區域
     image = cv2.bitwise_and(image, image, mask=mask)
     
     # 計算各個顏色的像素數量
@@ -53,7 +57,7 @@ def main():
         image = np.array(cv2.imdecode(np.frombuffer(uploaded_file.read(), np.uint8), 1))
         
         # 顯示原始圖片
-        st.image(image, caption="原始圖片", use_column_width=True)
+        #st.image(image, caption="原始圖片", use_column_width=True)
         
         # 處理圖片，傳遞容忍度參數
         processed_image = process_image(image, tolerance)
