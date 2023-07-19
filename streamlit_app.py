@@ -2,6 +2,7 @@ import streamlit as st
 from PIL import Image
 from PIL import ImageOps
 from io import BytesIO
+import base64
 
 def remove_background(image):
     # 在這裡添加你的去背景程式碼
