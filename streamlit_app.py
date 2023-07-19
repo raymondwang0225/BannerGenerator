@@ -1,81 +1,70 @@
 import cv2
 import numpy as np
-from PIL import Image
 import streamlit as st
+from PIL import Image
 
-def find_largest_color_region(image, color):
+
+def find_largest_color_region(image):
     # 将图像转换为HSV颜色空间
-    hsv_image = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
-    
-    # 指定颜色的HSV范围（例如，蓝色）
-    lower_color = np.array([h, s, v])  # 替换为所需颜色的下限阈值
-    upper_color = np.array([h, s, v])  # 替换为所需颜色的上限阈值
-    
-    # 根据颜色范围创建掩码
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+    # 计算颜色直方图
+    hist = cv2.calcHist([hsv_image], [0, 1], None, [180, 256], [0, 180, 0, 256])
+
+    # 寻找最大直方图值对应的颜色
+    h, s = np.unravel_index(np.argmax(hist), hist.shape)[:2]
+
+    # 返回最大区域的颜色（HSV值）
+    return h, s
+
+
+def remove_background(image, threshold):
+    # 将图像转换为HSV颜色空间
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+    # 获取最大区域的颜色（背景颜色）
+    h, s = find_largest_color_region(hsv_image)
+
+    # 设定颜色范围
+    lower_color = np.array([h - threshold, 0, 0])
+    upper_color = np.array([h + threshold, 255, 255])
+
+    # 创建颜色遮罩
     mask = cv2.inRange(hsv_image, lower_color, upper_color)
-    
-    # 使用形态学操作对掩码进行处理，去除噪点
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-    
-    # 查找图像中的轮廓
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    if contours:
-        # 找到最大面积的轮廓
-        largest_contour = max(contours, key=cv2.contourArea)
-        
-        # 创建与原始图像相同大小的掩码图像
-        region_mask = np.zeros_like(mask)
-        
-        # 将最大面积的轮廓填充到掩码图像中
-        cv2.drawContours(region_mask, [largest_contour], -1, 255, cv2.FILLED)
-        
-        # 将掩码应用于原始图像，提取相同颜色区域
-        color_region = cv2.bitwise_and(image, image, mask=region_mask)
-        
-        return color_region
-    
-    return None
 
+    # 对原始图像应用颜色遮罩
+    result = cv2.bitwise_and(image, image, mask=mask)
 
-def remove_background(image, color):
-    # 将图像转换为OpenCV的BGR格式
-    cv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-
-    # 根据颜色找到最大区域
-    color_region = find_largest_color_region(cv_image, color)
-
-    if color_region is not None:
-        # 将图像转换回PIL格式
-        result = Image.fromarray(cv2.cvtColor(color_region, cv2.COLOR_BGR2RGB))
-        return result
-
-    return None
+    return result
 
 
 # Streamlit App
 def main():
     st.title("背景去除")
+
+    # 上传图像
     uploaded_file = st.file_uploader("上传图像", type=['jpg', 'jpeg', 'png'])
-    
+
     if uploaded_file is not None:
         # 读取上传的图像
         image = Image.open(uploaded_file)
-        
-        # 指定要去除的颜色（例如，蓝色）
-        color = (h, s, v)  # 替换为所需颜色的HSV值
-        
+
+        # 指定背景去除的阈值
+        threshold = st.slider("背景去除强度", 0, 50, 10)
+
+        # 将图像转换为OpenCV的BGR格式
+        cv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+
         # 进行背景去除
-        removed_background = remove_background(image, color)
-        
-        if removed_background is not None:
-            # 显示去除背景后的图像
-            st.subheader("去除背景后的图像")
-            st.image(removed_background)
-        else:
-            st.write("未找到指定颜色的区域")
-    
+        removed_background = remove_background(cv_image, threshold)
+
+        # 将去除背景后的图像转换为PIL格式
+        result_image = Image.fromarray(cv2.cvtColor(removed_background, cv2.COLOR_BGR2RGB))
+
+        # 显示去除背景后的图像
+        st.subheader("去除背景后的图像")
+        st.image(result_image)
+
 
 if __name__ == "__main__":
     main()
