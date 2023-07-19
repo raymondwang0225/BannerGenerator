@@ -13,7 +13,8 @@ def process_image(image):
     max_color = unique_colors[np.argmax(counts)]
     
     # 將該顏色設置為透明
-    image[np.where((image == max_color).all(axis=2))] = [0, 0, 0, 0]
+    mask = np.all(image == max_color, axis=2)
+    image[mask] = [0, 0, 0, 0]
     
     # 將圖片轉換為RGBA格式
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGBA)
