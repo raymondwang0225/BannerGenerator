@@ -39,14 +39,14 @@ def main():
                 </style>
                 """
     st.markdown(hide_st_style, unsafe_allow_html=True)
-    
+
     st.title("Banner Generator")
 
     uploaded_file = st.file_uploader("Upload Image", type=['jpg', 'jpeg', 'png'])
 
     if uploaded_file is not None:
         col1, col2,col3 = st.columns(3)
-        if col1:
+        with col1:
             st.subheader("Banner")
             # 指定背景颜色
             background_color = st.color_picker("Choose Background Color", "#ffffff")
@@ -54,14 +54,14 @@ def main():
             banner_width = st.slider("Banner Width", 100, 1000, 500)
             banner_height = st.slider("Banner Height", 100, 1000, 200)
             
-        if col2:
-            st.subheader("Upload Image")
+        with col2:
+            st.subheader("Image")
             # 根据banner_size调整position的最大值和最小值
             position_x = st.slider("Image Position(X)", -banner_height, banner_width, 100)
             position_y = st.slider("Image Position(Y)", -banner_height, banner_height, 50)
             position = (position_x, -position_y)
 
-        if col3:
+        with col3:
             st.subheader("Text")
             # 指定Banner文字
             text = st.text_input("Input Banner Text")
