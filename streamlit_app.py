@@ -1,74 +1,81 @@
 import cv2
 import numpy as np
 from PIL import Image
-from io import BytesIO
-import base64
 import streamlit as st
 
-
-def remove_background(image_data, threshold):
-    # 将图像数据转换为OpenCV的BGR格式
-    img_array = np.array(image_data)
-    img = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
-
-    # 将图像转换为灰度图像
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    # 进行阈值处理来创建二值图像
-    _, mask = cv2.threshold(gray, threshold, 255, cv2.THRESH_BINARY_INV)
-
-    # 使用形态学操作进行背景去除
+def find_largest_color_region(image, color):
+    # 将图像转换为HSV颜色空间
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+    
+    # 指定颜色的HSV范围（例如，蓝色）
+    lower_color = np.array([h, s, v])  # 替换为所需颜色的下限阈值
+    upper_color = np.array([h, s, v])  # 替换为所需颜色的上限阈值
+    
+    # 根据颜色范围创建掩码
+    mask = cv2.inRange(hsv_image, lower_color, upper_color)
+    
+    # 使用形态学操作对掩码进行处理，去除噪点
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
     mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+    
+    # 查找图像中的轮廓
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    if contours:
+        # 找到最大面积的轮廓
+        largest_contour = max(contours, key=cv2.contourArea)
+        
+        # 创建与原始图像相同大小的掩码图像
+        region_mask = np.zeros_like(mask)
+        
+        # 将最大面积的轮廓填充到掩码图像中
+        cv2.drawContours(region_mask, [largest_contour], -1, 255, cv2.FILLED)
+        
+        # 将掩码应用于原始图像，提取相同颜色区域
+        color_region = cv2.bitwise_and(image, image, mask=region_mask)
+        
+        return color_region
+    
+    return None
 
-    # 将图像转换为PIL格式，并转换为RGBA模式
-    result = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB)).convert("RGBA")
 
-    # 将mask数组转换为uint8类型，以便与PIL图像的数据类型兼容
-    mask = np.uint8(mask)
+def remove_background(image, color):
+    # 将图像转换为OpenCV的BGR格式
+    cv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
-    # 创建一个与result图像大小相同的全黑图像
-    alpha = Image.new("L", result.size, 0)
-    alpha.putdata(mask.ravel())
+    # 根据颜色找到最大区域
+    color_region = find_largest_color_region(cv_image, color)
 
-    # 将alpha通道应用到result图像上
-    result.putalpha(alpha)
+    if color_region is not None:
+        # 将图像转换回PIL格式
+        result = Image.fromarray(cv2.cvtColor(color_region, cv2.COLOR_BGR2RGB))
+        return result
 
-    return result
-
+    return None
 
 
 # Streamlit App
 def main():
     st.title("背景去除")
-
-    # 上传图像
     uploaded_file = st.file_uploader("上传图像", type=['jpg', 'jpeg', 'png'])
-
+    
     if uploaded_file is not None:
-        # 读取上传的图像数据
-        image_data = uploaded_file.getvalue()
-
-        # 将图像数据转换为PIL图像
-        image = Image.open(BytesIO(image_data))
-
-        # 指定背景去除的阈值
-        threshold = st.slider("背景去除强度", 0, 255, 100)
-
+        # 读取上传的图像
+        image = Image.open(uploaded_file)
+        
+        # 指定要去除的颜色（例如，蓝色）
+        color = (h, s, v)  # 替换为所需颜色的HSV值
+        
         # 进行背景去除
-        removed_background = remove_background(image, threshold)
-
-        # 显示去除背景后的图像
-        st.subheader("去除背景后的图像")
-        st.image(removed_background)
-
-        # 下载去除背景后的图像
-        buffered = BytesIO()
-        removed_background.save(buffered, format="PNG")
-        img_str = base64.b64encode(buffered.getvalue()).decode()
-        href = f'<a href="data:file/png;base64,{img_str}" download="removed_background.png">点击下载</a>'
-        st.markdown(href, unsafe_allow_html=True)
-
+        removed_background = remove_background(image, color)
+        
+        if removed_background is not None:
+            # 显示去除背景后的图像
+            st.subheader("去除背景后的图像")
+            st.image(removed_background)
+        else:
+            st.write("未找到指定颜色的区域")
+    
 
 if __name__ == "__main__":
     main()
