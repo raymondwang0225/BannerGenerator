@@ -4,12 +4,12 @@ import streamlit as st
 from PIL import Image
 
 
-def remove_background(image):
+def remove_background(image, threshold):
     # 将图像转换为灰度图像
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # 使用阈值处理将图像转换为二值图像
-    _, thresh = cv2.threshold(gray, 1, 255, cv2.THRESH_BINARY)
+    _, thresh = cv2.threshold(gray, threshold, 255, cv2.THRESH_BINARY)
 
     # 寻找轮廓
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -44,8 +44,11 @@ def main():
         # 将图像转换为OpenCV的BGR格式
         cv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
+        # 指定背景去除的阈值
+        threshold = st.slider("背景去除强度", 0, 255, 100)
+
         # 进行背景去除
-        removed_background = remove_background(cv_image)
+        removed_background = remove_background(cv_image, threshold)
 
         # 将去除背景后的图像转换为PIL格式
         result_image = Image.fromarray(removed_background)
