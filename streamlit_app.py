@@ -47,7 +47,7 @@ def main():
         image = cv2.imdecode(np.fromstring(uploaded_file.read(), np.uint8), 1)
         
         # 显示原始图像
-        #st.image(image, channels="BGR", caption="原始图像")
+        st.image(image, channels="BGR", caption="原始图像")
         
         # 创建一个滑动条，用于控制容差
         color_tolerance = st.slider("容差", 0, 50, 10)
