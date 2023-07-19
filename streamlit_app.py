@@ -3,7 +3,7 @@ from rembg import remove
 from PIL import Image
 from io import BytesIO
 import base64
-
+from PIL import ImageDraw, ImageFont
 
 def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position):
     image = Image.open(upload)
@@ -16,8 +16,7 @@ def fix_image(upload, position, background_color, text, banner_size, text_size, 
     banner_image = Image.new('RGBA', banner_size, background_color)
     banner_image.paste(fixed, position, fixed)
 
-    # 在 Banner 图片上添加文字
-    from PIL import ImageDraw, ImageFont
+    # 在 Banner 图片上添加文字   
     draw = ImageDraw.Draw(banner_image)
     font = ImageFont.truetype("Pixels.ttf", text_size)
     text_width, text_height = draw.textsize(text, font=font)
@@ -32,35 +31,37 @@ def fix_image(upload, position, background_color, text, banner_size, text_size, 
 def main():
     st.title("Banner Generator")
 
-    uploaded_file = st.file_uploader("上传图片", type=['jpg', 'jpeg', 'png'])
+    # 设置sidebar
+    st.sidebar.title("设置")
+    uploaded_file = st.sidebar.file_uploader("上传图片", type=['jpg', 'jpeg', 'png'])
 
     if uploaded_file is not None:
         # 指定图片位置
-        banner_width = st.slider("Banner宽度", 100, 1000, 500)
-        banner_height = st.slider("Banner高度", 100, 1000, 200)
+        banner_width = st.sidebar.slider("Banner宽度", 100, 1000, 500)
+        banner_height = st.sidebar.slider("Banner高度", 100, 1000, 200)
 
         # 根据banner_size调整position的最大值和最小值
-        position_x = st.slider("图片位置 (X)", -banner_height, banner_width, 100)
-        position_y = st.slider("图片位置 (Y)", -banner_height, banner_height, 50)
+        position_x = st.sidebar.slider("图片位置 (X)", -banner_height, banner_width, 100)
+        position_y = st.sidebar.slider("图片位置 (Y)", -banner_height, banner_height, 50)
 
         position = (position_x, -position_y)
 
         # 指定背景颜色
-        background_color = st.color_picker("选择背景颜色", "#ffffff")
+        background_color = st.sidebar.color_picker("选择背景颜色", "#ffffff")
 
         # 指定Banner文字
-        text = st.text_input("输入Banner文字")
+        text = st.sidebar.text_input("输入Banner文字")
 
         # 指定Banner文字大小
-        text_size = st.slider("文字大小", 8, 72, 24)
+        text_size = st.sidebar.slider("文字大小", 8, 72, 24)
 
         # 指定Banner文字颜色
-        text_color = st.color_picker("文字颜色", "#000000")
+        text_color = st.sidebar.color_picker("文字颜色", "#000000")
 
         # 指定Banner文字位置
-        text_position_x = st.slider("文字位置 (X)", -banner_width, banner_width, 0)
-        text_position_y = st.slider("文字位置 (Y)", -banner_height, banner_height, 0)
-        text_position = (text_position_x, -text_position_y)
+        text_position_x = st.sidebar.slider("文字位置 (X)", -banner_width, banner_width, 0)
+        text_position_y = st.sidebar.slider("文字位置 (Y)", -banner_height, banner_height, 0)
+        text_position = (text_position_x, text_position_y)
 
         # 指定Banner尺寸
         banner_size = (banner_width, banner_height)
