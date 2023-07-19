@@ -19,7 +19,7 @@ def remove_background(image, threshold):
 
     # 将图像转换为PIL格式
     result = Image.fromarray(cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB))
-    result.putalpha(mask)
+    result.putalpha(128)
 
     return result
 
