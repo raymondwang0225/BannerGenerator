@@ -11,22 +11,19 @@ def convert_image(img):
     return byte_im
 
 def fix_image(upload, position, background_color, text):
-    image = Image.open(upload)
-    resized_image = image.resize((500, 200))
-    
     # 去除图片背景
     with st.spinner('正在去除背景...'):
-        image_data = convert_image(resized_image)
+        image_data = convert_image(upload)
         result = remove(image_data)
 
     # 创建 Banner 图片
-    banner_image = Image.open(BytesIO(result)).convert("RGBA")
-    banner_image.paste(resized_image, (position[0], position[1]))
+    banner_image = Image.new('RGBA', (500, 200), background_color)
+    banner_image.paste(Image.open(BytesIO(result)), position)
     
     # 在 Banner 图片上添加文字
     from PIL import ImageDraw, ImageFont
     draw = ImageDraw.Draw(banner_image)
-    font = ImageFont.truetype("Pixels.ttf", 24)
+    font = ImageFont.truetype("arial.ttf", 24)
     draw.text((50, 50), text, fill="white", font=font)
 
     return banner_image
