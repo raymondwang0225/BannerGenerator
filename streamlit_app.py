@@ -1,30 +1,31 @@
 import streamlit as st
 import cv2
 import numpy as np
-from rembg import remove
 
-def process_image(image):
+def process_image(image, tolerance):
     # 將圖片轉換為RGBA格式
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGBA)
-
+    
     # 計算各個顏色的像素數量
     unique_colors, counts = np.unique(image.reshape(-1, 4), axis=0, return_counts=True)
-
+    
     # 找到佔比最大的顏色
     max_color = unique_colors[np.argmax(counts)]
-
+    
     # 將該顏色設置為透明
-    mask = np.all(image == max_color, axis=2)
+    mask = np.all(np.abs(image - max_color) <= tolerance, axis=2)
     image[mask] = [0, 0, 0, 0]
-
+    
     return image
-
 
 def main():
     st.title("圖片處理應用")
     
     # 上傳圖片
     uploaded_file = st.file_uploader("選擇一張圖片", type=["jpg", "jpeg", "png"])
+    
+    # 容忍度滑桿
+    tolerance = st.slider("容忍度", min_value=0, max_value=50, value=10)
     
     if uploaded_file is not None:
         # 讀取上傳的圖片
@@ -33,9 +34,9 @@ def main():
         # 顯示原始圖片
         st.image(image, caption="原始圖片", use_column_width=True)
         
-        # 處理圖片
-        processed_image = process_image(image)
-        processed_image = remove(processed_image)
+        # 處理圖片，傳遞容忍度參數
+        processed_image = process_image(image, tolerance)
+        
         # 顯示處理後的圖片
         st.image(processed_image, caption="處理後的圖片", use_column_width=True)
 
