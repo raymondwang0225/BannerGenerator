@@ -3,23 +3,21 @@ import cv2
 import numpy as np
 
 def process_image(image):
-    # 將圖片轉換為BGR格式
-    image = cv2.cvtColor(image, cv2.COLOR_RGBA2BGR)
-    
+    # 將圖片轉換為RGBA格式
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGBA)
+
     # 計算各個顏色的像素數量
-    unique_colors, counts = np.unique(image.reshape(-1, 3), axis=0, return_counts=True)
-    
+    unique_colors, counts = np.unique(image.reshape(-1, 4), axis=0, return_counts=True)
+
     # 找到佔比最大的顏色
     max_color = unique_colors[np.argmax(counts)]
-    
+
     # 將該顏色設置為透明
     mask = np.all(image == max_color, axis=2)
     image[mask] = [0, 0, 0, 0]
-    
-    # 將圖片轉換為RGBA格式
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGBA)
-    
+
     return image
+
 
 def main():
     st.title("圖片處理應用")
