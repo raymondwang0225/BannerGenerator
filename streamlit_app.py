@@ -21,8 +21,8 @@ def remove_background(image_data, threshold):
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
     mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
-    # 将图像转换为PIL格式
-    result = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    # 将图像转换为PIL格式，并转换为RGBA模式
+    result = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB)).convert("RGBA")
     result.putalpha(mask)
 
     return result
