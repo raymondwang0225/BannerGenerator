@@ -37,10 +37,10 @@ def main():
         banner_height = st.slider("Banner高度", 100, 1000, 200)
 
         # 根据banner_size调整position的最大值和最小值
-        position_x_max = banner_width
-        position_x_min = -banner_width
-        position_y_max = banner_height
-        position_y_min = -banner_height
+        position_x_max = banner_width/2
+        position_x_min = -banner_width/2
+        position_y_max = banner_height/2
+        position_y_min = -banner_height/2
 
         position_x = st.slider("图片位置 (X)", position_x_min, position_x_max, 100)
         position_y = st.slider("图片位置 (Y)", position_y_min, position_y_max, 50)
