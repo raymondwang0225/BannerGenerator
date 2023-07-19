@@ -4,14 +4,12 @@ from PIL import Image
 from io import BytesIO
 import base64
 import numpy as np
-import tempfile
+
 
 def convert_image(img):
-    temp_file = tempfile.NamedTemporaryFile(delete=False)
-    temp_file.close()
-    img.save(temp_file.name, format="PNG")
-    with open(temp_file.name, "rb") as file:
-        byte_im = file.read()
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    byte_im = buf.getvalue()
     return byte_im
 
 def fix_image(upload, position, background_color, text):
