@@ -8,59 +8,19 @@ import cv2
 import numpy as np
 
 
-def process_license_image(image_path):
-    # 读取图像
-    img = cv2.imread(image_path)
-    hh, ww = img.shape[:2]
-
-    # 剪切掉周围的3个像素以去除外部白色边框
-    img = img[3:hh-3, 3:ww-3]
-
-    # 在周围添加3个黑色像素，并添加额外的10个像素作为后续形态学处理的缓冲区
-    img = cv2.copyMakeBorder(img, 13, 13, 13, 13, cv2.BORDER_CONSTANT, (0, 0, 0))
-
-    # 将图像转换为灰度图像
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    # 二值化处理
-    thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY)[1]
-
-    # 应用形态学操作以去除小的黑色斑点
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
-    thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
-    hh2, ww2 = thresh.shape[:2]
-
-    # 剪切掉周围的10个像素
-    thresh = thresh[10:hh2-10, 10:ww2-10]
-
-    # 获取最大的外轮廓
-    cnts = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    cnts = cnts[0] if len(cnts) == 2 else cnts[1]
-    big_contour = max(cnts, key=cv2.contourArea)
-
-    # 在黑色背景上绘制填充的轮廓
-    mask = np.zeros_like(thresh)
-    cv2.drawContours(mask, [big_contour], -1, (255), cv2.FILLED)
-
-    # 使用遮罩将阈值化的许可证外部变为白色
-    result = thresh.copy()
-    result[mask == 0] = 255
-
-    # 返回处理结果
-    return thresh, mask, result
-
-
 def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position):
-    #image = Image.open(upload)
-    thresh_image, mask_image, result_image = process_license_image(upload)
-    fixed = result_image
+    # 读取上传的图像
+    img = cv2.imdecode(np.fromstring(upload.read(), np.uint8), cv2.IMREAD_COLOR)
 
-    # 缩放fixed图像至banner尺寸并保持比例
-    fixed.thumbnail(banner_size)
+    # 进行背景去除
+    thresh_image, _, _ = process_license_image(img)
+
+    # 缩放上传的图像至banner尺寸并保持比例
+    img = cv2.resize(img, banner_size)
 
     # 创建 Banner 图片
-    banner_image = Image.new('RGBA', banner_size, background_color)
-    banner_image.paste(fixed, position, fixed)
+    banner_image = Image.new('RGB', banner_size, background_color)
+    banner_image.paste(Image.fromarray(img), position, Image.fromarray(img))
 
     # 在 Banner 图片上添加文字
     draw = ImageDraw.Draw(banner_image)
@@ -70,7 +30,11 @@ def fix_image(upload, position, background_color, text, banner_size, text_size, 
     text_position_y = text_position[1] - text_height / 2
     draw.text((text_position_x, text_position_y), text, fill=text_color, font=font)
 
+    # 将背景去除后的图像覆盖到Banner上
+    banner_image.paste(Image.fromarray(thresh_image), position, Image.fromarray(thresh_image))
+
     return banner_image
+
 
 
 # Streamlit App
