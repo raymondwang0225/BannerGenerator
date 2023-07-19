@@ -20,8 +20,7 @@ def process_image(image, color_tolerance):
     mask = cv2.inRange(hsv_image, lower_color, upper_color)
     
     # 计算掩码中最大连通区域的面积和位置
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
+    _, contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     max_contour = max(contours, key=cv2.contourArea)
     _, _, width, height = cv2.boundingRect(max_contour)
     max_area = width * height
@@ -31,13 +30,8 @@ def process_image(image, color_tolerance):
     cv2.drawContours(new_mask, [max_contour], 0, (255), -1)
     
     # 将新的掩码应用于图像，将最大连通区域以外的像素设置为透明
-    image[new_mask == 0, :] = [0, 0, 0, 0]  # 设置透明像素的颜色
-
-
-
-
-
-
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)  # 转换为带透明通道的图像
+    image[new_mask == 0] = [0, 0, 0, 0]  # 设置透明像素的颜色
     
     return image
 
@@ -61,7 +55,7 @@ def main():
         processed_image = process_image(image, color_tolerance)
         
         # 显示处理后的图像
-        st.image(processed_image, channels="BGR", caption="处理后的图像")
+        st.image(processed_image, channels="RGBA", caption="处理后的图像")
 
 if __name__ == "__main__":
     main()
