@@ -18,7 +18,7 @@ def remove_background(image):
     mask = np.zeros_like(image)
 
     # 绘制物体轮廓到掩码图像
-    cv2.fillPoly(mask, contours, (255, 255, 255))
+    cv2.drawContours(mask, contours, -1, (255, 255, 255), thickness=cv2.FILLED)
 
     # 将掩码图像转换为灰度图像
     mask_gray = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
