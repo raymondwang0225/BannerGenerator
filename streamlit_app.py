@@ -56,9 +56,12 @@ def fix_image(upload, position, background_color, text, banner_size, text_size, 
     # 缩放上传的图像至banner尺寸并保持比例
     img = cv2.resize(img, banner_size)
 
+    # 将OpenCV图像转换为NumPy数组
+    img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+
     # 创建 Banner 图片
     banner_image = Image.new('RGB', banner_size, background_color)
-    banner_image.paste(Image.fromarray(img), position, Image.fromarray(img))
+    banner_image.paste(img, position)
 
     # 在 Banner 图片上添加文字
     draw = ImageDraw.Draw(banner_image)
@@ -72,6 +75,7 @@ def fix_image(upload, position, background_color, text, banner_size, text_size, 
     banner_image.paste(Image.fromarray(thresh_image), position, Image.fromarray(thresh_image))
 
     return banner_image
+
 
 # Streamlit App
 def main():
