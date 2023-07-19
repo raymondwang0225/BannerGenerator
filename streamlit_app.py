@@ -1,38 +1,32 @@
-import streamlit as st
-from rembg import remove
+import cv2
+import numpy as np
 from PIL import Image
-from io import BytesIO
-import base64
-from PIL import ImageDraw, ImageFont
 
 
+def remove_background(image, threshold):
+    # 将图像转换为OpenCV的BGR格式
+    cv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
+    # 将图像转换为灰度图像
+    gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
 
-def replace_white_with_transparent(image):
-    # 将图像转换为RGBA模式，以支持透明度
-    image = image.convert("RGBA")
+    # 应用阈值处理来创建二值图像
+    _, mask = cv2.threshold(gray, threshold, 255, cv2.THRESH_BINARY_INV)
 
-    # 获取图像的像素数据
-    data = image.getdata()
+    # 使用形态学操作进行背景去除
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
-    # 创建一个新的像素列表，将白色像素替换为透明
-    new_data = []
-    for item in data:
-        # 如果像素是白色，将其替换为透明
-        if item[:3] == (255, 255, 255):
-            new_data.append((255, 255, 255, 0))  # 设置透明度为0
-        else:
-            new_data.append(item)
+    # 将图像转换为PIL格式
+    result = Image.fromarray(cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB))
+    result.putalpha(mask)
 
-    # 更新图像的像素数据
-    image.putdata(new_data)
-
-    return image
+    return result
 
 
 # Streamlit App
 def main():
-    st.title("Replace White with Transparent")
+    st.title("背景去除")
 
     # 上传图像
     uploaded_file = st.file_uploader("上传图像", type=['jpg', 'jpeg', 'png'])
@@ -41,12 +35,15 @@ def main():
         # 读取上传的图像
         image = Image.open(uploaded_file)
 
-        # 替换白色为透明
-        replaced_image = replace_white_with_transparent(image)
+        # 指定背景去除的阈值
+        threshold = st.slider("背景去除强度", 0, 255, 100)
 
-        # 显示替换后的图像
-        st.subheader("替换后的图像")
-        st.image(replaced_image)
+        # 进行背景去除
+        removed_background = remove_background(image, threshold)
+
+        # 显示去除背景后的图像
+        st.subheader("去除背景后的图像")
+        st.image(removed_background)
 
 
 if __name__ == "__main__":
