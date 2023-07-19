@@ -45,7 +45,7 @@ def main():
         position_x = st.slider("图片位置 (X)", -banner_height, banner_width, 100)
         position_y = st.slider("图片位置 (Y)", -banner_height, banner_height, 50)
 
-        position = (position_x, position_y)
+        position = (position_x, -position_y)
 
         # 指定背景颜色
         background_color = st.color_picker("选择背景颜色", "#ffffff")
