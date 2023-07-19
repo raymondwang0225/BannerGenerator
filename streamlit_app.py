@@ -30,7 +30,16 @@ def fix_image(upload, position, background_color, text, banner_size, text_size, 
 # Streamlit App
 def main():
     st.set_page_config(layout='wide', initial_sidebar_state='expanded')
-   
+
+    hide_st_style = """
+                <style>
+                #MainMenu {visibility: hidden;}
+                footer {visibility: hidden;}
+                header {visibility: hidden;}
+                </style>
+                """
+    st.markdown(hide_st_style, unsafe_allow_html=True)
+
     st.title("Banner Generator")
 
     uploaded_file = st.file_uploader("Upload Image", type=['jpg', 'jpeg', 'png'])
