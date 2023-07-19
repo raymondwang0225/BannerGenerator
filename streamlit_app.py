@@ -32,6 +32,29 @@ def remove_background(image, threshold):
     return result
 
 
+def fill_color(image):
+    # 将图像转换为灰度图像
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+    # 寻找轮廓
+    contours, _ = cv2.findContours(gray, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # 找到最大面积的轮廓
+    max_contour = max(contours, key=cv2.contourArea)
+
+    # 创建一个与图像形状相同的掩码图像
+    mask = np.zeros(image.shape[:2], dtype=np.uint8)
+
+    # 绘制最大面积轮廓到掩码图像
+    cv2.drawContours(mask, [max_contour], -1, 255, thickness=cv2.FILLED)
+
+    # 使用掩码图像将除黑色像素和最大面积相同颜色的像素外，其余像素设为黑色
+    result = image.copy()
+    result[np.logical_and(mask != 0, result != [0, 0, 0])] = [0, 0, 0]
+
+    return result
+
+
 # Streamlit App
 def main():
     st.title("物体轮廓提取和背景去除")
@@ -52,11 +75,14 @@ def main():
         # 进行背景去除
         removed_background = remove_background(cv_image, threshold)
 
-        # 将去除背景后的图像转换为PIL格式
-        result_image = Image.fromarray(removed_background)
+        # 填充其他颜色为黑色
+        filled_image = fill_color(removed_background)
 
-        # 显示去除背景后的图像
-        st.subheader("去除背景后的图像")
+        # 将去除背景并填充颜色后的图像转换为PIL格式
+        result_image = Image.fromarray(filled_image)
+
+        # 显示去除背景并填充颜色后的图像
+        st.subheader("去除背景并填充颜色后的图像")
         st.image(result_image)
 
 
