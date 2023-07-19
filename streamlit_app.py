@@ -1,73 +1,65 @@
 import streamlit as st
-import cv2
-import numpy as np
+from rembg import remove
 from PIL import Image
+import numpy as np
 
 
 def remove_background(image, mask):
-    # 将图像转换为RGBA模式，以支持透明度
+    # Convert image to RGBA mode to support transparency
     image = image.convert("RGBA")
 
-    # 获取图像的像素数据
+    # Get pixel data of the image
     data = np.array(image)
 
-    # 将分割的背景区域设置为透明
+    # Set the background region from the segmentation mask as transparent
     data[..., 3] = np.where(mask == 0, 0, 255)
 
-    # 创建新的图像并返回
+    # Create a new image and return
     new_image = Image.fromarray(data)
     return new_image
 
 
 # Streamlit App
 def main():
-    st.title("背景去除")
+    st.title("Background Removal")
 
-    # 上传图像
-    uploaded_file = st.file_uploader("上传图像", type=['jpg', 'jpeg', 'png'])
+    # Upload image
+    uploaded_file = st.file_uploader("Upload Image", type=['jpg', 'jpeg', 'png'])
 
     if uploaded_file is not None:
-        # 读取上传的图像
+        # Read the uploaded image
         image = Image.open(uploaded_file)
 
-        # 显示图像
-        st.image(image, caption="原始图像")
+        # Display the original image
+        st.image(image, caption="Original Image")
 
-        # 显示图像选择工具
-        st.subheader("选择背景区域")
-        selected_area = st.image(image, caption="选择背景区域", use_column_width=True, clamp=True)
+        # Display the image selection tool
+        st.subheader("Select Background Region")
+        selected_area = st.image(image, caption="Selected Background Region", use_column_width=True, clamp=True)
 
-        # 创建空的掩码图像
+        # Create an empty mask image
         mask = np.zeros(image.size, dtype=np.uint8)
 
-        # 设置鼠标事件处理函数
-        def mouse_callback(event, x, y, flags, param):
-            if event == cv2.EVENT_LBUTTONDOWN:
-                # 在掩码图像上绘制白色点
-                cv2.circle(mask, (x, y), 3, (255, 255, 255), -1)
-                selected_area.image(mask, caption="选择背景区域", use_column_width=True, clamp=True)
+        # Set the mouse event callback function
+        def mouse_callback(event):
+            if event["type"] == "mousedown":
+                # Draw a white point on the mask image
+                x, y = event["x"], event["y"]
+                mask[y, x] = 255
+                selected_area.image(mask, caption="Selected Background Region", use_column_width=True, clamp=True)
 
-        # 将图像转换为OpenCV格式
-        cv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+        # Add the mouse event callback to the image selection tool
+        selected_area = st.image(image, caption="Selected Background Region", use_column_width=True, clamp=True)
+        selected_area._add_mouse_callbacks(mouse_callback)
 
-        # 创建窗口并设置鼠标事件回调
-        cv2.namedWindow("Select Background")
-        cv2.setMouseCallback("Select Background", mouse_callback)
+        # Perform image segmentation using an algorithm such as watershed or GrabCut
+        # Obtain the segmentation mask result
 
-        # 显示OpenCV窗口
-        cv2.imshow("Select Background", cv_image)
-
-        # 等待用户选择背景区域
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
-        # 运行图像分割算法，如分水岭算法或GrabCut算法，对选择的背景区域进行分割并获得分割结果的掩码
-
-        # 调用去除背景函数，将分割结果应用于图像
+        # Call the remove background function and apply the segmentation result to the image
         removed_background = remove_background(image, mask)
 
-        # 显示去除背景后的图像
-        st.subheader("去除背景后的图像")
+        # Display the image with the background removed
+        st.subheader("Image with Background Removed")
         st.image(removed_background)
 
 
