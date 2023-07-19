@@ -1,9 +1,8 @@
 import streamlit as st
-from PIL import Image
-from PIL import ImageOps
+from PIL import Image, ImageOps
 from io import BytesIO
 import base64
-from skimage import color, data, restoration
+from skimage import color, feature
 import numpy as np
 
 def remove_background(image):
@@ -33,7 +32,7 @@ def generate_banner(image, position, background_color, text):
     # 在圖片上繪製文字
     from PIL import ImageDraw, ImageFont
     draw = ImageDraw.Draw(banner_image)
-    font = ImageFont.truetype("Pixels.ttf", 24)
+    font = ImageFont.truetype("arial.ttf", 24)
     draw.text((50, 50), text, fill="white", font=font)
 
     return banner_image
