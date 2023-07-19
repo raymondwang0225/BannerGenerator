@@ -14,7 +14,7 @@ def process_image(image):
     
     # 將該顏色設置為透明
     mask = np.all(image == max_color, axis=2)
-    image = np.where(mask[..., None], [0, 0, 0, 0], image)
+    image[mask] = [0, 0, 0, 0]
     
     # 將圖片轉換為RGBA格式
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGBA)
