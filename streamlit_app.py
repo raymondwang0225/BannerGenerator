@@ -1,62 +1,97 @@
 import streamlit as st
-import cv2
-import numpy as np
+from rembg import remove
+from PIL import Image
+from io import BytesIO
+import base64
+from PIL import ImageDraw, ImageFont
 
-def process_image(image, color_tolerance):
-    # 将图像转换为HSV颜色空间
-    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position):
+    image = Image.open(upload)
+    fixed = remove(image)
 
-    # 计算图像中每个颜色的像素数
-    hist = cv2.calcHist([hsv_image], [0], None, [180], [0, 180])
+    # 缩放fixed图像至banner尺寸并保持比例
+    fixed.thumbnail(banner_size)
 
-    # 找到颜色频次最高的色相
-    dominant_color_hue = np.argmax(hist)
+    # 创建 Banner 图片
+    banner_image = Image.new('RGBA', banner_size, background_color)
+    banner_image.paste(fixed, position, fixed)
 
-    # 根据色相和容差计算颜色范围
-    lower_color = np.array([dominant_color_hue - color_tolerance, 100, 100])
-    upper_color = np.array([dominant_color_hue + color_tolerance, 255, 255])
+    # 在 Banner 图片上添加文字
+    draw = ImageDraw.Draw(banner_image)
+    font = ImageFont.truetype("Pixels.ttf", text_size)
+    text_width, text_height = draw.textsize(text, font=font)
+    text_position_x = text_position[0] - text_width / 2
+    text_position_y = text_position[1] - text_height / 2
+    draw.text((text_position_x, text_position_y), text, fill=text_color, font=font)
 
-    # 创建一个掩码来标记在颜色范围内的像素
-    mask = cv2.inRange(hsv_image, lower_color, upper_color)
+    return banner_image
 
-    # 计算掩码中最大连通区域的面积和位置
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    max_contour = max(contours, key=cv2.contourArea)
-    _, _, width, height = cv2.boundingRect(max_contour)
-    max_area = width * height
-
-    # 创建一个新的掩码，只保留最大连通区域内的像素
-    new_mask = np.zeros_like(mask)
-    cv2.drawContours(new_mask, [max_contour], 0, (255), -1)
-
-    # 将新的掩码应用于图像，将最大连通区域以外的像素设置为透明
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)  # 转换为带透明通道的图像
-    image[new_mask != 255] = [0, 0, 0, 0]  # 设置透明像素的颜色
-
-    return image
-
+# Streamlit App
 def main():
-    st.title("图像处理")
+    #st.set_page_config(layout='wide', initial_sidebar_state='expanded')
 
-    # 创建一个上传文件的组件
-    uploaded_file = st.file_uploader("选择一张图片", type=["jpg", "jpeg", "png"])
+    hide_st_style = """
+                <style>
+                #MainMenu {visibility: hidden;}
+                footer {visibility: hidden;}
+                header {visibility: hidden;}
+                </style>
+                """
+    st.markdown(hide_st_style, unsafe_allow_html=True)
+
+    st.title("Banner Generator")
+
+    uploaded_file = st.file_uploader("Upload Image", type=['jpg', 'jpeg', 'png'])
 
     if uploaded_file is not None:
-        # 读取上传的图像
-        image = cv2.imdecode(np.fromstring(uploaded_file.read(), np.uint8), 1)
+        col1, col2,col3 = st.columns(3,gap="large")
+        with col1:
+            st.subheader("Banner")
+            # 指定背景颜色
+            background_color = st.color_picker("Choose Background Color", "#ffffff")
+            # 指定图片位置
+            banner_width = st.slider("Banner Width", 100, 1000, 500)
+            banner_height = st.slider("Banner Height", 100, 1000, 200)
+            
+        with col2:
+            st.subheader("Image")
+            # 根据banner_size调整position的最大值和最小值
+            position_x = st.slider("Image Position(X)", -banner_height, banner_width, 100)
+            position_y = st.slider("Image Position(Y)", -banner_height, banner_height, 50)
+            position = (position_x, -position_y)
 
-        # 显示原始图像
-        #st.image(image, channels="BGR", caption="原始图像")
+        with col3:
+            st.subheader("Text")
+            # 指定Banner文字
+            text = st.text_input("Input Banner Text")
+             # 指定Banner文字颜色
+            text_color = st.color_picker("Text Color", "#000000")
 
-        # 创建一个滑动条，用于控制容差
-        color_tolerance = st.slider("容差", 0, 50, 10)
+            # 指定Banner文字大小
+            text_size = st.slider("Text Size", 8, 120, 24)
 
-        # 处理图像
-        processed_image = process_image(image, color_tolerance)
+            # 指定Banner文字位置
+            text_position_x = st.slider("Text Position(X)", -banner_width, banner_width, 0)
+            text_position_y = st.slider("Text Position(Y)", -banner_height, banner_height, 0)
+            text_position = (text_position_x, -text_position_y)
 
-        # 显示处理后的图像
-        st.image(processed_image, channels="RGBA", caption="处理后的图像")
+        # 指定Banner尺寸
+        banner_size = (banner_width, banner_height)
+
+        # 生成Banner图片
+        banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position)
+
+        # 显示Banner图片
+        st.image(banner_image)
+
+        # 下载完成的图片
+        buffered = BytesIO()
+        banner_image.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+        href = f'<a href="data:file/png;base64,{img_str}" download="banner.png">点击下载</a>'
+        st.markdown(href, unsafe_allow_html=True)
+
 
 if __name__ == "__main__":
     main()
