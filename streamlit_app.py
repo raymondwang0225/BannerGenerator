@@ -1,66 +1,96 @@
 import streamlit as st
 from rembg import remove
 from PIL import Image
-import numpy as np
+from io import BytesIO
+import base64
+from PIL import ImageDraw, ImageFont
 
+def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position):
+    image = Image.open(upload)
+    fixed = remove(image)
 
-def remove_background(image, mask):
-    # Convert image to RGBA mode to support transparency
-    image = image.convert("RGBA")
+    # 缩放fixed图像至banner尺寸并保持比例
+    fixed.thumbnail(banner_size)
 
-    # Get pixel data of the image
-    data = np.array(image)
+    # 创建 Banner 图片
+    banner_image = Image.new('RGBA', banner_size, background_color)
+    banner_image.paste(fixed, position, fixed)
 
-    # Set the background region from the segmentation mask as transparent
-    data[..., 3] = np.where(mask == 0, 0, 255)
+    # 在 Banner 图片上添加文字
+    draw = ImageDraw.Draw(banner_image)
+    font = ImageFont.truetype("Pixels.ttf", text_size)
+    text_width, text_height = draw.textsize(text, font=font)
+    text_position_x = text_position[0] - text_width / 2
+    text_position_y = text_position[1] - text_height / 2
+    draw.text((text_position_x, text_position_y), text, fill=text_color, font=font)
 
-    # Create a new image and return
-    new_image = Image.fromarray(data)
-    return new_image
+    return banner_image
 
 
 # Streamlit App
 def main():
-    st.title("Background Removal")
+    #st.set_page_config(layout='wide', initial_sidebar_state='expanded')
 
-    # Upload image
+    hide_st_style = """
+                <style>
+                #MainMenu {visibility: hidden;}
+                footer {visibility: hidden;}
+                header {visibility: hidden;}
+                </style>
+                """
+    st.markdown(hide_st_style, unsafe_allow_html=True)
+
+    st.title("Banner Generator")
+
     uploaded_file = st.file_uploader("Upload Image", type=['jpg', 'jpeg', 'png'])
 
     if uploaded_file is not None:
-        # Read the uploaded image
-        image = Image.open(uploaded_file)
+        col1, col2,col3 = st.columns(3,gap="large")
+        with col1:
+            st.subheader("Banner")
+            # 指定背景颜色
+            background_color = st.color_picker("Choose Background Color", "#ffffff")
+            # 指定图片位置
+            banner_width = st.slider("Banner Width", 100, 1000, 500)
+            banner_height = st.slider("Banner Height", 100, 1000, 200)
+            
+        with col2:
+            st.subheader("Image")
+            # 根据banner_size调整position的最大值和最小值
+            position_x = st.slider("Image Position(X)", -banner_height, banner_width, 100)
+            position_y = st.slider("Image Position(Y)", -banner_height, banner_height, 50)
+            position = (position_x, -position_y)
 
-        # Display the original image
-        st.image(image, caption="Original Image")
+        with col3:
+            st.subheader("Text")
+            # 指定Banner文字
+            text = st.text_input("Input Banner Text")
+             # 指定Banner文字颜色
+            text_color = st.color_picker("Text Color", "#000000")
 
-        # Display the image selection tool
-        st.subheader("Select Background Region")
-        selected_area = st.image(image, caption="Selected Background Region", use_column_width=True, clamp=True)
+            # 指定Banner文字大小
+            text_size = st.slider("Text Size", 8, 120, 24)
 
-        # Create an empty mask image
-        mask = np.zeros(image.size, dtype=np.uint8)
+            # 指定Banner文字位置
+            text_position_x = st.slider("Text Position(X)", -banner_width, banner_width, 0)
+            text_position_y = st.slider("Text Position(Y)", -banner_height, banner_height, 0)
+            text_position = (text_position_x, -text_position_y)
 
-        # Set the mouse event callback function
-        def mouse_callback(event):
-            if event["type"] == "mousedown":
-                # Draw a white point on the mask image
-                x, y = event["x"], event["y"]
-                mask[y, x] = 255
-                selected_area.image(mask, caption="Selected Background Region", use_column_width=True, clamp=True)
+        # 指定Banner尺寸
+        banner_size = (banner_width, banner_height)
 
-        # Add the mouse event callback to the image selection tool
-        selected_area = st.image(image, caption="Selected Background Region", use_column_width=True, clamp=True)
-        selected_area._add_mouse_callbacks(mouse_callback)
+        # 生成Banner图片
+        banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position)
 
-        # Perform image segmentation using an algorithm such as watershed or GrabCut
-        # Obtain the segmentation mask result
+        # 显示Banner图片
+        st.image(banner_image)
 
-        # Call the remove background function and apply the segmentation result to the image
-        removed_background = remove_background(image, mask)
-
-        # Display the image with the background removed
-        st.subheader("Image with Background Removed")
-        st.image(removed_background)
+        # 下载完成的图片
+        buffered = BytesIO()
+        banner_image.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+        href = f'<a href="data:file/png;base64,{img_str}" download="banner.png">点击下载</a>'
+        st.markdown(href, unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
