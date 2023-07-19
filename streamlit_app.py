@@ -37,15 +37,15 @@ def main():
         banner_height = st.slider("Banner高度", 100, 1000, 200)
 
         # 根据banner_size调整position的最大值和最小值
-        #position_x_max = banner_width
-        #position_x_min = -banner_width
-        #position_y_max = banner_height
-        #position_y_min = -banner_height
+        position_x_max = banner_width
+        position_x_min = -banner_width
+        position_y_max = banner_height
+        position_y_min = -banner_height
 
-        position_x = st.slider("图片位置 (X)", -banner_height, banner_width, 100)
-        position_y = st.slider("图片位置 (Y)", -banner_height, banner_height, 50)
+        position_x = st.slider("图片位置 (X)", position_x_min, position_x_max, 100, key="position_x")
+        position_y = st.slider("图片位置 (Y)", position_y_min, position_y_max, 50, key="position_y")
 
-        position = (position_x, -position_y)
+        position = (position_x, position_y)
 
         # 指定背景颜色
         background_color = st.color_picker("选择背景颜色", "#ffffff")
@@ -60,7 +60,15 @@ def main():
         banner_image = fix_image(uploaded_file, position, background_color, text, banner_size)
 
         # 显示Banner图片
-        st.image(banner_image)
+        st.image(banner_image, use_column_width=True, clamp=True)
+
+        # 获取图片的位置信息
+        image_location = st.image_to_coordinates(banner_image)
+
+        # 更新图片位置
+        position_x = image_location["position_x"]
+        position_y = image_location["position_y"]
+        position = (position_x, position_y)
 
         # 下载完成的图片
         buffered = BytesIO()
