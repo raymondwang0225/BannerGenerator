@@ -50,7 +50,8 @@ def fill_color(image):
 
     # 使用掩码图像将除黑色像素和最大面积相同颜色的像素外，其余像素设为黑色
     result = image.copy()
-    result[np.logical_and(mask != 0, np.any(result != [0, 0, 0], axis=-1))] = [0, 0, 0]
+    result[np.logical_and(mask != 0, np.any(result != [0, 0, 0], axis=-1))] = [0, 0, 0, 0]
+
 
 
     return result
