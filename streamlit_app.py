@@ -21,11 +21,10 @@ def remove_background(image, threshold):
     cv2.drawContours(mask, contours, -1, (255, 255, 255), thickness=cv2.FILLED)
 
     # 创建一个背景范围的蒙版
-    background_mask = np.ones_like(image)
-    background_mask *= 255
+    background_mask = np.zeros_like(image)
 
     # 将最外层轮廓之外的颜色判定为要去除的背景范围
-    cv2.drawContours(background_mask, contours, -1, (0, 0, 0), thickness=cv2.FILLED)
+    cv2.drawContours(background_mask, contours, -1, (255, 255, 255), thickness=cv2.FILLED)
 
     # 将原始图像与背景范围蒙版进行按位与操作，仅保留指定颜色范围内的像素
     result = cv2.bitwise_and(image, background_mask)
