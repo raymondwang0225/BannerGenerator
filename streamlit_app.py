@@ -5,7 +5,7 @@ from io import BytesIO
 import base64
 
 
-def fix_image(upload, position, background_color, text, banner_size):
+def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position):
     image = Image.open(upload)
     fixed = remove(image)
 
@@ -19,8 +19,11 @@ def fix_image(upload, position, background_color, text, banner_size):
     # 在 Banner 图片上添加文字
     from PIL import ImageDraw, ImageFont
     draw = ImageDraw.Draw(banner_image)
-    font = ImageFont.truetype("Pixels.ttf", 24)
-    draw.text((50, 50), text, fill="white", font=font)
+    font = ImageFont.truetype("Pixels.ttf", text_size)
+    text_width, text_height = draw.textsize(text, font=font)
+    text_position_x = text_position[0] - text_width / 2
+    text_position_y = text_position[1] - text_height / 2
+    draw.text((text_position_x, text_position_y), text, fill=text_color, font=font)
 
     return banner_image
 
@@ -37,15 +40,10 @@ def main():
         banner_height = st.slider("Banner高度", 100, 1000, 200)
 
         # 根据banner_size调整position的最大值和最小值
-        position_x_max = banner_width
-        position_x_min = -banner_width
-        position_y_max = banner_height
-        position_y_min = -banner_height
+        position_x = st.slider("图片位置 (X)", -banner_height, banner_width, 100)
+        position_y = st.slider("图片位置 (Y)", -banner_height, banner_height, 50)
 
-        position_x = st.slider("图片位置 (X)", position_x_min, position_x_max, 100, key="position_x")
-        position_y = st.slider("图片位置 (Y)", position_y_min, position_y_max, 50, key="position_y")
-
-        position = (position_x, position_y)
+        position = (position_x, -position_y)
 
         # 指定背景颜色
         background_color = st.color_picker("选择背景颜色", "#ffffff")
@@ -53,22 +51,25 @@ def main():
         # 指定Banner文字
         text = st.text_input("输入Banner文字")
 
+        # 指定Banner文字大小
+        text_size = st.slider("文字大小", 8, 72, 24)
+
+        # 指定Banner文字颜色
+        text_color = st.color_picker("文字颜色", "#000000")
+
+        # 指定Banner文字位置
+        text_position_x = st.slider("文字位置 (X)", -banner_width, banner_width, 0)
+        text_position_y = st.slider("文字位置 (Y)", -banner_height, banner_height, 0)
+        text_position = (text_position_x, -text_position_y)
+
         # 指定Banner尺寸
         banner_size = (banner_width, banner_height)
 
         # 生成Banner图片
-        banner_image = fix_image(uploaded_file, position, background_color, text, banner_size)
+        banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position)
 
         # 显示Banner图片
-        st.image(banner_image, use_column_width=True, clamp=True)
-
-        # 获取图片的位置信息
-        image_location = st.image_to_coordinates(banner_image)
-
-        # 更新图片位置
-        position_x = image_location["position_x"]
-        position_y = image_location["position_y"]
-        position = (position_x, position_y)
+        st.image(banner_image)
 
         # 下载完成的图片
         buffered = BytesIO()
