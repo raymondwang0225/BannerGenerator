@@ -3,10 +3,12 @@ from rembg import remove
 from PIL import Image
 from io import BytesIO
 import base64
+import numpy as np
 
 def convert_image(img):
+    img_array = np.array(img)
     buf = BytesIO()
-    img.save(buf, format="PNG")
+    np.save(buf, img_array)
     byte_im = buf.getvalue()
     return byte_im
 
