@@ -21,7 +21,7 @@ def set_language():
         if st.button("English"):
             language = 'en'
 
-    st.set_session_state(language=language)
+    st.session_state.language = language
 
 # 中英文文字切換
 def translate_text(text_en, text_zh):
@@ -86,7 +86,7 @@ def main():
             # 指定Banner尺寸
             banner_size = (banner_width, banner_height)
 
-            with st.spinner(translate_text('Image processing, please wait...', '正在處理圖片，請稍候...')):
+            with st.spinner(translate_text('Image processing, please wait...', '正在處理圖片，請稍等...')):
                 # 處理圖片並顯示進度
                 # 生成Banner圖片
                 banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_custom)
