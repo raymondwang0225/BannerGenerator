@@ -39,7 +39,7 @@ def fix_image(upload,scale_ratio, position, background_color, text, banner_size,
 
 # Streamlit App
 def main():
-    st.set_page_config(layout='wide', initial_sidebar_state='expanded')
+    #st.set_page_config(layout='wide', initial_sidebar_state='expanded')
 
     hide_st_style = """
                 <style>
