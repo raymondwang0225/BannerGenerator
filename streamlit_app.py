@@ -27,9 +27,9 @@ def fix_image(upload, position, background_color, text, banner_size, text_size, 
     draw.text((text_position_x, text_position_y), text, fill=text_color, font=font)
 
      # 模拟图片处理过程
-    for i in range(1, 6):
-        progress.progress(i * 20)  # 更新进度条，每次增加20%
-        time.sleep(1)
+    for i in range(1, 11):
+        progress.progress(i * 10)  # 更新进度条，每次增加20%
+        time.sleep(0.5)
 
     return banner_image
 
@@ -72,7 +72,7 @@ def main():
         text_color = st.sidebar.color_picker("Text Color", "#000000")
 
         # 指定Banner文字大小
-        text_size = st.slider("Text Size", 8, 120, 24)
+        text_size = st.sidebar.slider("Text Size", 8, 120, 24)
 
         # 指定Banner文字位置
         text_position_x = st.sidebar.slider("Text Position(X)", -banner_width, banner_width, 0)
