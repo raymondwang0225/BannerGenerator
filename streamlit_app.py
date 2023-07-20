@@ -85,7 +85,7 @@ def main():
 
             #submit_button = form.form_submit_button(translate_text("Apply Settings", "套用設置"))
     with col2:
-        if uploaded_file is not None and submit_button:
+        if uploaded_file is not None:
             # 指定Banner尺寸
             banner_size = (banner_width, banner_height)
 
