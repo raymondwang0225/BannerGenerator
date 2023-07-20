@@ -43,44 +43,44 @@ def main():
     uploaded_file = st.file_uploader(translate_text("Upload Image", "上傳圖片"), type=['jpg', 'jpeg', 'png'])
     col1, col2 = st.columns([3, 7])
     with col1:
-        form = st.form("processing_form")
+        
         if uploaded_file is not None:
             # 添加選擇框來選擇處理選項
-            processing_option = form.selectbox(translate_text("Choose Processing Option", "選擇處理選項"), ("預設", "自定義"))
+            processing_option = st.selectbox(translate_text("Choose Processing Option", "選擇處理選項"), ("預設", "自定義"))
 
             if processing_option == "自定義":
                 # 添加滑動條以進行自定義設置
                 with st.expander(translate_text("Remove Background Setting", "移除背景設置")):
                     alpha_matting_custom = {
-                        "foreground_threshold": form.slider(translate_text("Alpha Matting Foreground Threshold", "Alpha Matting 前景閾值"), 0, 20, 9),
-                        "background_threshold": form.slider(translate_text("Alpha Matting Background Threshold", "Alpha Matting 背景閾值"), 0, 20, 3),
-                        "erode_size": form.slider(translate_text("Alpha Matting Erode Size", "Alpha Matting 侵蝕大小"), 0, 50, 17)
+                        "foreground_threshold": st.slider(translate_text("Alpha Matting Foreground Threshold", "Alpha Matting 前景閾值"), 0, 20, 9),
+                        "background_threshold": st.slider(translate_text("Alpha Matting Background Threshold", "Alpha Matting 背景閾值"), 0, 20, 3),
+                        "erode_size": st.slider(translate_text("Alpha Matting Erode Size", "Alpha Matting 侵蝕大小"), 0, 50, 17)
                     }
             else:
                 alpha_matting_custom = None
             with st.expander(translate_text("Banner Setting", "Banner 設置")):
                 # 指定背景顏色
-                background_color = form.color_picker(translate_text("Choose Background Color", "選擇背景顏色"), "#ffffff")
+                background_color = st.color_picker(translate_text("Choose Background Color", "選擇背景顏色"), "#ffffff")
                 # 指定圖片位置
-                banner_width = form.slider(translate_text("Banner Width", "Banner 寬度"), 100, 1500, 1500)
-                banner_height = form.slider(translate_text("Banner Height", "Banner 高度"), 100, 500, 500)
+                banner_width = st.slider(translate_text("Banner Width", "Banner 寬度"), 100, 1500, 1500)
+                banner_height = st.slider(translate_text("Banner Height", "Banner 高度"), 100, 500, 500)
 
             with st.expander(translate_text("Image Setting", "圖片設置")):
                 # 根據banner_size調整position的最大值和最小值
-                position_x = form.slider(translate_text("Image Position(X)", "圖片位置(X)"), -banner_height, banner_width, 100)
-                position_y = form.slider(translate_text("Image Position(Y)", "圖片位置(Y)"), -banner_height, banner_height, 50)
+                position_x = st.slider(translate_text("Image Position(X)", "圖片位置(X)"), -banner_height, banner_width, 100)
+                position_y = st.slider(translate_text("Image Position(Y)", "圖片位置(Y)"), -banner_height, banner_height, 50)
                 position = (position_x, -position_y)
 
             with st.expander(translate_text("Text Setting", "文字設置")):
                 # 指定Banner文字
-                text = form.text_input(translate_text("Input Banner Text", "輸入Banner文字"), "比特幣青蛙")
+                text = st.text_input(translate_text("Input Banner Text", "輸入Banner文字"), "比特幣青蛙")
                 # 指定Banner文字顏色
-                text_color = form.color_picker(translate_text("Text Color", "文字顏色"), "#ffffff")
+                text_color = st.color_picker(translate_text("Text Color", "文字顏色"), "#ffffff")
                 # 指定Banner文字大小
-                text_size = form.slider(translate_text("Text Size", "文字大小"), 8, 240, 120)
+                text_size = st.slider(translate_text("Text Size", "文字大小"), 8, 240, 120)
                 # 指定Banner文字位置
-                text_position_x = form.slider(translate_text("Text Position(X)", "文字位置(X)"), -banner_width, banner_width, 0)
-                text_position_y = form.slider(translate_text("Text Position(Y)", "文字位置(Y)"), -banner_height, banner_height, 0)
+                text_position_x = st.slider(translate_text("Text Position(X)", "文字位置(X)"), -banner_width, banner_width, 0)
+                text_position_y = st.slider(translate_text("Text Position(Y)", "文字位置(Y)"), -banner_height, banner_height, 0)
                 text_position = (text_position_x, -text_position_y)
 
             #submit_button = form.form_submit_button(translate_text("Apply Settings", "套用設置"))
