@@ -49,11 +49,10 @@ def main():
 
     uploaded_file = st.file_uploader("Upload Image", type=['jpg', 'jpeg', 'png'])
     col1,col2 = st.columns([3,7])
-    with col1:
+    if uploaded_file is not None:
         banner_width = 1500
         banner_height = 500
-
-        if uploaded_file is not None:
+        with col1:
             # Add a selectbox for processing options
             processing_option = st.selectbox("Choose Processing Option", ("default", "customize"))
 
@@ -91,26 +90,26 @@ def main():
                 text_position_x = st.slider("Text Position(X)", -banner_width, banner_width, 0)
                 text_position_y = st.slider("Text Position(Y)", -banner_height, banner_height, 0)
                 text_position = (text_position_x, -text_position_y)
-    with col2:
-        # 指定Banner尺寸
-        banner_size = (banner_width, banner_height)
+        with col2:
+            # 指定Banner尺寸
+            banner_size = (banner_width, banner_height)
 
-        progress_placeholder = st.empty()
+            progress_placeholder = st.empty()
 
-        with st.spinner('Image processing, please wait...'):
-            # 处理图片并显示进度
-            # 生成Banner圖片
-            banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_custom, progress_placeholder)
+            with st.spinner('Image processing, please wait...'):
+                # 处理图片并显示进度
+                # 生成Banner圖片
+                banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_custom, progress_placeholder)
 
-        # 顯示Banner圖片
-        st.image(banner_image)
+            # 顯示Banner圖片
+            st.image(banner_image)
 
-        # 下載完成的圖片
-        buffered = BytesIO()
-        banner_image.save(buffered, format="PNG")
-        img_str = base64.b64encode(buffered.getvalue()).decode()
-        href = f'<a href="data:file/png;base64,{img_str}" download="banner.png">Click to Download</a>'
-        st.markdown(href, unsafe_allow_html=True)
+            # 下載完成的圖片
+            buffered = BytesIO()
+            banner_image.save(buffered, format="PNG")
+            img_str = base64.b64encode(buffered.getvalue()).decode()
+            href = f'<a href="data:file/png;base64,{img_str}" download="banner.png">Click to Download</a>'
+            st.markdown(href, unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
