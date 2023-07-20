@@ -5,7 +5,7 @@ from io import BytesIO
 import base64
 from PIL import ImageDraw, ImageFont
 import time
-import asyncio
+
 
 def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position,progress):
     image = Image.open(upload)
@@ -92,7 +92,6 @@ def main():
             # 处理图片并显示进度
             # 生成Banner圖片
             banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position,progress_placeholder)
-            asyncio.run(st.block_until_complete(banner_image))
         # 顯示Banner圖片
         st.image(banner_image)
 
