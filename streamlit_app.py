@@ -107,7 +107,7 @@ def main():
         with st.spinner('Image processing, please wait...'):
             # 处理图片并显示进度
             # 生成Banner圖片
-            banner_image = fix_image(option,uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_foreground_threshold, alpha_matting_background_threshold, alpha_matting_erode_size,progress_placeholder)
+            banner_image = fix_image(option,uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_foreground_threshold, alpha_matting_background_threshold, alpha_matting_erode_size,progress=progress_placeholder)
         # 顯示Banner圖片
         st.image(banner_image)
 
