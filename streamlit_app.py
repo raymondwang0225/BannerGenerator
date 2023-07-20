@@ -7,7 +7,7 @@ from PIL import ImageDraw, ImageFont
 
 def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position):
     image = Image.open(upload)
-    fixed = remove(image, alpha_matting=True, alpha_matting_foreground_threshold=9, alpha_matting_background_threshold=3, alpha_matting_erode_size=50)
+    fixed = remove(image, alpha_matting_foreground_threshold=9, alpha_matting_background_threshold=3, alpha_matting_erode_size=50)
 
     # 縮放fixed圖像至banner尺寸並保持比例
     fixed.thumbnail(banner_size)
