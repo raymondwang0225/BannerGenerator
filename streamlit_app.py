@@ -7,9 +7,9 @@ from PIL import ImageDraw, ImageFont
 import time
 
 
-def fix_image(op,upload, position, background_color, text, banner_size, text_size, text_color, text_position,alpha_matting_foreground_threshold, alpha_matting_background_threshold, alpha_matting_erode_size,progress):
+def fix_image(option,upload, position, background_color, text, banner_size, text_size, text_color, text_position,alpha_matting_foreground_threshold, alpha_matting_background_threshold, alpha_matting_erode_size,progress):
     image = Image.open(upload)
-    if op =="Customized":
+    if option is "Customized":
         fixed = remove(image, alpha_matting=True, alpha_matting_foreground_threshold=alpha_matting_foreground_threshold, alpha_matting_background_threshold=alpha_matting_background_threshold, alpha_matting_erode_size=alpha_matting_erode_size)
     else:
         fixed = remove(image)
@@ -53,14 +53,7 @@ def main():
 
     uploaded_file = st.file_uploader("Upload Image", type=['jpg', 'jpeg', 'png'])
 
-    option = st.selectbox(
-            'Remove Background Function',
-            ('Default', 'Customized'))
-    if option == 'Customized':
-        # 調整透明度分割的相關參數
-        alpha_matting_foreground_threshold = st.slider("Foreground Threshold", 0, 255, 9)
-        alpha_matting_background_threshold = st.slider("Background Threshold", 0, 255, 3)
-        alpha_matting_erode_size = st.slider("Erode Size", 0, 50, 17)
+    
 
     if uploaded_file is not None:
         with st.expander("Banner Setting"):
@@ -101,6 +94,15 @@ def main():
         
 
         progress_placeholder = st.empty()
+
+        option = st.selectbox(
+            'Remove Background Function',
+            ('Default', 'Customized'))
+        if option is 'Customized':
+            # 調整透明度分割的相關參數
+            alpha_matting_foreground_threshold = st.slider("Foreground Threshold", 0, 255, 9)
+            alpha_matting_background_threshold = st.slider("Background Threshold", 0, 255, 3)
+            alpha_matting_erode_size = st.slider("Erode Size", 0, 50, 17)
         
         with st.spinner('Image processing, please wait...'):
             # 处理图片并显示进度
