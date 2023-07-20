@@ -86,7 +86,7 @@ def main():
     
     col1, col2 = st.columns([3, 7])
     with col1:
-        scol1, scol2 = st.columns([1, 9])
+        scol1, scol2 = st.columns([4, 6])
         with scol1:
             set_language()
         st.title(translate_text("Banner Generator", "横幅生成器"))
