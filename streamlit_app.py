@@ -83,7 +83,7 @@ def main():
                 text_position_y = form.slider(translate_text("Text Position(Y)", "文字位置(Y)"), -banner_height, banner_height, 0)
                 text_position = (text_position_x, -text_position_y)
 
-            submit_button = form.form_submit_button(translate_text("Apply Settings", "套用設置"))
+            #submit_button = form.form_submit_button(translate_text("Apply Settings", "套用設置"))
     with col2:
         if uploaded_file is not None and submit_button:
             # 指定Banner尺寸
