@@ -5,7 +5,7 @@ from io import BytesIO
 import base64
 from PIL import ImageDraw, ImageFont
 
-def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_foreground_threshold, alpha_matting_background_threshold, alpha_matting_erode_size):
+def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position):
     image = Image.open(upload)
     fixed = remove(image, alpha_matting=True, alpha_matting_foreground_threshold=9, alpha_matting_background_threshold=3, alpha_matting_erode_size=50)
 
@@ -85,7 +85,7 @@ def main():
         #alpha_matting_erode_size = st.slider("Erode Size", 0, 50, 11)
 
         # 生成Banner圖片
-        banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_foreground_threshold, alpha_matting_background_threshold, alpha_matting_erode_size)
+        banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position)
 
         # 顯示Banner圖片
         st.image(banner_image)
