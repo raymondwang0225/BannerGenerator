@@ -9,10 +9,16 @@ import time
 # 獲取用戶選擇的語言設置，預設為英文
 language = st.session_state.get('language', 'en')
 
-# 切換語言
-def switch_language():
+# 切換語言為中文
+def switch_to_chinese():
     global language
-    language = 'zh' if language == 'en' else 'en'
+    language = 'zh'
+    st.session_state.language = language
+
+# 切換語言為英文
+def switch_to_english():
+    global language
+    language = 'en'
     st.session_state.language = language
 
 # 設置語言選項
@@ -20,8 +26,11 @@ def set_language():
     global language
     st.write("目前語言：" + ("中文" if language == "zh" else "English"))
 
-    if st.button(translate_text("Switch Language", "切換語言")):
-        switch_language()
+    if st.button("中文", key="chinese"):
+        switch_to_chinese()
+
+    if st.button("English", key="english"):
+        switch_to_english()
 
 # 中英文文字切換
 def translate_text(text_en, text_zh):
