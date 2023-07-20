@@ -90,7 +90,7 @@ def main():
 
     st.title(translate_text("Banner Generator", "横幅生成器"))
     uploaded_file = st.file_uploader(translate_text("Upload Image", "上载图像"), type=['jpg', 'jpeg', 'png'])
-
+    st.divider()
 
     col1, col2 = st.columns([3, 7])
     with col1:
