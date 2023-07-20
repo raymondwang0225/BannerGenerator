@@ -83,7 +83,7 @@ def main():
             """
     st.markdown(hide_st_style, unsafe_allow_html=True)
     
-    scol1, scol2 = st.columns([3, 7])
+    scol1, scol2 = st.columns([1, 9])
     with scol1:
         set_language()
     
