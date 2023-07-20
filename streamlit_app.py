@@ -30,6 +30,52 @@ def set_language():
 def translate_text(text_en, text_zh):
     return text_zh if language == '中文' else text_en
 
+
+
+def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_custom, progress):
+    image = Image.open(upload)
+
+    if alpha_matting_custom:
+        # 使用自訂參數來處理圖像
+        fixed = remove(
+            image,
+            alpha_matting=True,
+            alpha_matting_foreground_threshold=alpha_matting_custom["foreground_threshold"],
+            alpha_matting_background_threshold=alpha_matting_custom["background_threshold"],
+            alpha_matting_erode_size=alpha_matting_custom["erode_size"]
+        )
+    else:
+        # 使用預設參數來處理圖像
+        fixed = remove(image)
+
+    # 縮放fixed圖像至banner尺寸並保持比例
+    fixed.thumbnail(banner_size)
+
+    # 創建 Banner 圖片
+    banner_image = Image.new('RGBA', banner_size, background_color)
+    banner_image.paste(fixed, position, fixed)
+
+    # 在 Banner 圖片上添加文字
+    draw = ImageDraw.Draw(banner_image)
+    font = ImageFont.truetype("Pixels.ttf", text_size)
+    text_width, text_height = draw.textsize(text, font=font)
+    text_position_x = text_position[0] - text_width / 2
+    text_position_y = text_position[1] - text_height / 2
+    draw.text((text_position_x, text_position_y), text, fill=text_color, font=font)
+
+
+    # 模拟图片处理过程
+    for i in range(1, 6):
+        progress.progress(i * 20)  # 更新进度条，每次增加20%
+        if i==5:
+            progress.progress(0)
+        time.sleep(0.5)
+        
+    return banner_image
+
+
+
+
 # Streamlit App
 def main():
     global language
