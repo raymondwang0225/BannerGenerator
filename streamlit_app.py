@@ -51,6 +51,20 @@ def main():
     col1,col2 = st.columns([3,7])
     with col1:
         if uploaded_file is not None:
+            # Add a selectbox for processing options
+            processing_option = st.selectbox("Choose Processing Option", ("default", "customize"))
+
+            if processing_option == "customize":
+                with st.expander("Remove Background Setting"):
+                    # Add sliders for custom settings
+                    alpha_matting_custom = {
+                        "foreground_threshold": st.slider("Alpha Matting Foreground Threshold", 0, 20, 9),
+                        "background_threshold": st.slider("Alpha Matting Background Threshold", 0, 20, 3),
+                        "erode_size": st.slider("Alpha Matting Erode Size", 0, 50, 17)
+                    }
+            else:
+                alpha_matting_custom = None
+                
             with st.expander("Banner Setting"):
                 # 指定背景顏色
                 background_color = st.color_picker("Choose Background Color", "#ffffff")
@@ -79,19 +93,7 @@ def main():
         # 指定Banner尺寸
         banner_size = (banner_width, banner_height)
 
-        # Add a selectbox for processing options
-        processing_option = st.selectbox("Choose Processing Option", ("default", "customize"))
-
-        if processing_option == "customize":
-            with st.expander("Remove Background Setting"):
-                # Add sliders for custom settings
-                alpha_matting_custom = {
-                    "foreground_threshold": st.slider("Alpha Matting Foreground Threshold", 0, 20, 9),
-                    "background_threshold": st.slider("Alpha Matting Background Threshold", 0, 20, 3),
-                    "erode_size": st.slider("Alpha Matting Erode Size", 0, 50, 17)
-                }
-        else:
-            alpha_matting_custom = None
+        
 
         progress_placeholder = st.empty()
 
