@@ -50,6 +50,9 @@ def main():
     uploaded_file = st.file_uploader("Upload Image", type=['jpg', 'jpeg', 'png'])
     col1,col2 = st.columns([3,7])
     with col1:
+        banner_width = 1500
+        banner_height = 500
+
         if uploaded_file is not None:
             # Add a selectbox for processing options
             processing_option = st.selectbox("Choose Processing Option", ("default", "customize"))
@@ -64,7 +67,6 @@ def main():
                     }
             else:
                 alpha_matting_custom = None
-                
             with st.expander("Banner Setting"):
                 # 指定背景顏色
                 background_color = st.color_picker("Choose Background Color", "#ffffff")
@@ -90,16 +92,13 @@ def main():
                 text_position_y = st.slider("Text Position(Y)", -banner_height, banner_height, 0)
                 text_position = (text_position_x, -text_position_y)
     with col2:
-        
-
-        
+        # 指定Banner尺寸
+        banner_size = (banner_width, banner_height)
 
         progress_placeholder = st.empty()
 
         with st.spinner('Image processing, please wait...'):
             # 处理图片并显示进度
-            # 指定Banner尺寸
-            banner_size = (banner_width, banner_height)
             # 生成Banner圖片
             banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_custom, progress_placeholder)
 
