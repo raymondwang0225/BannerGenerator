@@ -9,19 +9,19 @@ import time
 # 獲取用戶選擇的語言設置，預設為英文
 language = st.session_state.get('language', 'en')
 
+# 切換語言
+def switch_language():
+    global language
+    language = 'zh' if language == 'en' else 'en'
+    st.session_state.language = language
+
 # 設置語言選項
 def set_language():
     global language
     st.write("目前語言：" + ("中文" if language == "zh" else "English"))
 
-    if language == 'en':
-        if st.button("中文"):
-            language = 'zh'
-    else:
-        if st.button("English"):
-            language = 'en'
-
-    st.session_state.language = language
+    if st.button(translate_text("Switch Language", "切換語言")):
+        switch_language()
 
 # 中英文文字切換
 def translate_text(text_en, text_zh):
@@ -55,52 +55,4 @@ def main():
                     }
             else:
                 alpha_matting_custom = None
-            with st.expander(translate_text("Banner Setting", "Banner 設置")):
-                # 指定背景顏色
-                background_color = form.color_picker(translate_text("Choose Background Color", "選擇背景顏色"), "#ffffff")
-                # 指定圖片位置
-                banner_width = form.slider(translate_text("Banner Width", "Banner 寬度"), 100, 1500, 1500)
-                banner_height = form.slider(translate_text("Banner Height", "Banner 高度"), 100, 500, 500)
-
-            with st.expander(translate_text("Image Setting", "圖片設置")):
-                # 根據banner_size調整position的最大值和最小值
-                position_x = form.slider(translate_text("Image Position(X)", "圖片位置(X)"), -banner_height, banner_width, 100)
-                position_y = form.slider(translate_text("Image Position(Y)", "圖片位置(Y)"), -banner_height, banner_height, 50)
-                position = (position_x, -position_y)
-
-            with st.expander(translate_text("Text Setting", "文字設置")):
-                # 指定Banner文字
-                text = form.text_input(translate_text("Input Banner Text", "輸入Banner文字"), "比特幣青蛙")
-                # 指定Banner文字顏色
-                text_color = form.color_picker(translate_text("Text Color", "文字顏色"), "#ffffff")
-                # 指定Banner文字大小
-                text_size = form.slider(translate_text("Text Size", "文字大小"), 8, 240, 120)
-                # 指定Banner文字位置
-                text_position_x = form.slider(translate_text("Text Position(X)", "文字位置(X)"), -banner_width, banner_width, 0)
-                text_position_y = form.slider(translate_text("Text Position(Y)", "文字位置(Y)"), -banner_height, banner_height, 0)
-                text_position = (text_position_x, -text_position_y)
-
-            submit_button = form.form_submit_button(translate_text("Apply Settings", "套用設置"))
-    with col2:
-        if uploaded_file is not None and submit_button:
-            # 指定Banner尺寸
-            banner_size = (banner_width, banner_height)
-
-            with st.spinner(translate_text('Image processing, please wait...', '正在處理圖片，請稍等...')):
-                # 處理圖片並顯示進度
-                # 生成Banner圖片
-                banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_custom)
-
-            # 顯示Banner圖片
-            st.image(banner_image)
-
-            # 下載完成的圖片
-            buffered = BytesIO()
-            banner_image.save(buffered, format="PNG")
-            img_str = base64.b64encode(buffered.getvalue()).decode()
-            download_text = translate_text("Click to Download", "點擊下載")
-            href = f'<a href="data:file/png;base64,{img_str}" download="banner.png">{download_text}</a>'
-            st.markdown(href, unsafe_allow_html=True)
-
-if __name__ == "__main__":
-    main()
+            with st.expander
