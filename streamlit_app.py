@@ -14,15 +14,15 @@ language = st.session_state.get('language', 'en')
 # 設置語言選項
 def set_language():
     global language
-    st.write("目前語言：" + ("中文" if language == "zh" else "English"))
-
     if st.button("中文", key="chinese"):
         language = 'zh'
         st.session_state.language = 'zh'
+        st.write("目前語言：" + 'zh')
 
     if st.button("English", key="english"):
         language = 'en'
         st.session_state.language = 'en'
+        st.write("目前語言：" + 'en')
 
 # 中英文文字切換
 def translate_text(text_en, text_zh):
