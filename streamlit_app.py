@@ -76,17 +76,17 @@ def main():
 
     set_language()
 
-    st.title(translate_text("Banner Generator", "橫幅生成器"))
-
-    uploaded_file = st.file_uploader(translate_text("Upload Image", "上傳圖片"), type=['jpg', 'jpeg', 'png'])
+    
     col1, col2 = st.columns([3, 7])
     with col1:
-        
+        st.title(translate_text("Banner Generator", "橫幅生成器"))
+        uploaded_file = st.file_uploader(translate_text("Upload Image", "上傳圖片"), type=['jpg', 'jpeg', 'png'])
+
         if uploaded_file is not None:
             # 添加選擇框來選擇處理選項
-            processing_option = st.selectbox(translate_text("Choose Processing Option", "選擇處理選項"), ("預設", "自定義"))
+            processing_option = st.selectbox(translate_text("Choose Processing Option", "選擇處理選項"), (translate_text("Default", "預設"), translate_text("Custom", "自定義")))
 
-            if processing_option == "自定義":
+            if processing_option == translate_text("Custom", "自定義"):
                 # 添加滑動條以進行自定義設置
                 with st.expander(translate_text("Remove Background Setting", "移除背景設置")):
                     alpha_matting_custom = {
