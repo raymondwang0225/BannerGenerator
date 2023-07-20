@@ -84,13 +84,11 @@ def main():
     st.markdown(hide_st_style, unsafe_allow_html=True)
 
     
-
-    
-
-    
     col1, col2 = st.columns([3, 7])
     with col1:
-        set_language()
+        scol1, scol2 = st.columns([1, 9])
+        with scol1:
+            set_language()
         st.title(translate_text("Banner Generator", "横幅生成器"))
         uploaded_file = st.file_uploader(translate_text("Upload Image", "上载图像"), type=['jpg', 'jpeg', 'png'])
 
