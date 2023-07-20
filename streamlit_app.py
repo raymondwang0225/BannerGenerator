@@ -5,9 +5,10 @@ from io import BytesIO
 import base64
 from PIL import ImageDraw, ImageFont
 import time
+import asyncio
 
-def process_image(image, position, background_color, text, banner_size, text_size, text_color, text_position, progress):
-    image = Image.open(image)
+def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position, progress):
+    image = Image.open(upload)
     fixed = remove(image, alpha_matting=True, alpha_matting_foreground_threshold=9, alpha_matting_background_threshold=3, alpha_matting_erode_size=17)
 
     # 縮放fixed圖像至banner尺寸並保持比例
@@ -83,10 +84,12 @@ def main():
         # 按钮，只有按下按钮时才执行处理过程
         if st.button("Generate"):
             progress_placeholder = st.empty()
+            
             with st.spinner('图片处理中，请稍候...'):
                 # 处理图片并显示进度
-                # 生成Banner圖片
-                banner_image = process_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, progress_placeholder)
+                # 使用st.block_until_complete装饰器来阻塞用户输入
+                asyncio.run(st.block_until_complete(fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, progress_placeholder)))
+                
             # 顯示Banner圖片
             st.image(banner_image)
 
