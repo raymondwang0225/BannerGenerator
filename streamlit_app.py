@@ -64,7 +64,7 @@ def main():
                     }
             else:
                 alpha_matting_custom = None
-
+                
             with st.expander("Banner Setting"):
                 # 指定背景顏色
                 background_color = st.color_picker("Choose Background Color", "#ffffff")
@@ -89,16 +89,17 @@ def main():
                 text_position_x = st.slider("Text Position(X)", -banner_width, banner_width, 0)
                 text_position_y = st.slider("Text Position(Y)", -banner_height, banner_height, 0)
                 text_position = (text_position_x, -text_position_y)
-
-    # 指定Banner尺寸
-    banner_size = (banner_width, banner_height)
-
     with col2:
         
+
+        
+
         progress_placeholder = st.empty()
 
         with st.spinner('Image processing, please wait...'):
             # 处理图片并显示进度
+            # 指定Banner尺寸
+            banner_size = (banner_width, banner_height)
             # 生成Banner圖片
             banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_custom, progress_placeholder)
 
