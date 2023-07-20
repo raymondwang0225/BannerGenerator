@@ -7,13 +7,16 @@ from PIL import ImageDraw, ImageFont
 import time
 
 
-def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position,progress):
+def fix_image(upload,scale_ratio, position, background_color, text, banner_size, text_size, text_color, text_position,progress):
     image = Image.open(upload)
     fixed = remove(image, alpha_matting=True, alpha_matting_foreground_threshold=9, alpha_matting_background_threshold=3, alpha_matting_erode_size=17)
 
     # 縮放fixed圖像至banner尺寸並保持比例
     fixed.thumbnail(banner_size)
-
+     # Resize the image proportionally based on the scale_ratio
+    new_width = int(fixed.width * scale_ratio)
+    new_height = int(fixed.height * scale_ratio)
+    fixed = fixed.resize((new_width, new_height))
     # 創建 Banner 圖片
     banner_image = Image.new('RGBA', banner_size, background_color)
     banner_image.paste(fixed, position, fixed)
@@ -62,6 +65,7 @@ def main():
         
         with st.expander("Image Setting"):
             #st.sidebar.subheader("Image")
+            image_scale = st.sidebar.slider("Image Scale Ratio", 0.1, 3, 1)
             # 根據banner_size調整position的最大值和最小值
             position_x = st.sidebar.slider("Image Position(X)", -banner_height, banner_width, 100)
             position_y = st.sidebar.slider("Image Position(Y)", -banner_height, banner_height, 50)
@@ -94,7 +98,7 @@ def main():
         with st.spinner('Image processing, please wait...'):
             # 处理图片并显示进度
             # 生成Banner圖片
-            banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position,progress_placeholder)
+            banner_image = fix_image(uploaded_file, image_scale, position, background_color, text, banner_size, text_size, text_color, text_position,progress_placeholder)
         # 顯示Banner圖片
         st.image(banner_image)
 
