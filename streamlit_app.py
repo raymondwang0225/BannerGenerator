@@ -77,4 +77,30 @@ def main():
                 text_size = form.slider(translate_text("Text Size", "文字大小"), 8, 240, 120)
                 # 指定Banner文字位置
                 text_position_x = form.slider(translate_text("Text Position(X)", "文字位置(X)"), -banner_width, banner_width, 0)
-                text_position_y = form.slider(translate_text("Text Position(Y)", "文字位置(Y)"), -banner_height, banner
+                text_position_y = form.slider(translate_text("Text Position(Y)", "文字位置(Y)"), -banner_height, banner_height, 0)
+                text_position = (text_position_x, -text_position_y)
+
+            submit_button = form.form_submit_button(translate_text("Apply Settings", "套用設置"))
+    with col2:
+        if uploaded_file is not None and submit_button:
+            # 指定Banner尺寸
+            banner_size = (banner_width, banner_height)
+
+            with st.spinner(translate_text('Image processing, please wait...', '正在處理圖片，請稍等...')):
+                # 處理圖片並顯示進度
+                # 生成Banner圖片
+                banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_custom)
+
+            # 顯示Banner圖片
+            st.image(banner_image)
+
+            # 下載完成的圖片
+            buffered = BytesIO()
+            banner_image.save(buffered, format="PNG")
+            img_str = base64.b64encode(buffered.getvalue()).decode()
+            download_text = translate_text("Click to Download", "點擊下載")
+            href = f'<a href="data:file/png;base64,{img_str}" download="banner.png">{download_text}</a>'
+            st.markdown(href, unsafe_allow_html=True)
+
+if __name__ == "__main__":
+    main()
