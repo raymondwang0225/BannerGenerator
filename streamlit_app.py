@@ -65,7 +65,7 @@ def main():
     
     with st.expander("Image Setting"):
         #st.sidebar.subheader("Image")
-        image_scale = st.sidebar.slider("Image Scale Ratio", 0.1, 3, 1)
+        image_scale = st.sidebar.slider("Image Scale Ratio", 0.1, 3.0, 1.0)
         # 根據banner_size調整position的最大值和最小值
         position_x = st.sidebar.slider("Image Position(X)", -banner_height, banner_width, 100)
         position_y = st.sidebar.slider("Image Position(Y)", -banner_height, banner_height, 50)
