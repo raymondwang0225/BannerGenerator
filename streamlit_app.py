@@ -6,110 +6,90 @@ import base64
 from PIL import ImageDraw, ImageFont
 import time
 
+# 獲取用戶選擇的語言設置，預設為英文
+language = st.session_state.get('language', 'en')
 
-def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_custom, progress):
-    image = Image.open(upload)
+# 設置語言選項
+def set_language():
+    global language
+    st.write("目前語言：" + ("中文" if language == "zh" else "English"))
 
-    if alpha_matting_custom:
-        # 使用自訂參數來處理圖像
-        fixed = remove(
-            image,
-            alpha_matting=True,
-            alpha_matting_foreground_threshold=alpha_matting_custom["foreground_threshold"],
-            alpha_matting_background_threshold=alpha_matting_custom["background_threshold"],
-            alpha_matting_erode_size=alpha_matting_custom["erode_size"]
-        )
+    if language == 'en':
+        if st.button("中文"):
+            language = 'zh'
     else:
-        # 使用預設參數來處理圖像
-        fixed = remove(image)
+        if st.button("English"):
+            language = 'en'
 
-    # 縮放fixed圖像至banner尺寸並保持比例
-    fixed.thumbnail(banner_size)
+    st.set_session_state(language=language)
 
-    # 創建 Banner 圖片
-    banner_image = Image.new('RGBA', banner_size, background_color)
-    banner_image.paste(fixed, position, fixed)
-
-    # 在 Banner 圖片上添加文字
-    draw = ImageDraw.Draw(banner_image)
-    font = ImageFont.truetype("Pixels.ttf", text_size)
-    text_width, text_height = draw.textsize(text, font=font)
-    text_position_x = text_position[0] - text_width / 2
-    text_position_y = text_position[1] - text_height / 2
-    draw.text((text_position_x, text_position_y), text, fill=text_color, font=font)
-
-
-    # 模拟图片处理过程
-    for i in range(1, 6):
-        progress.progress(i * 20)  # 更新进度条，每次增加20%
-        if i==5:
-            progress.progress(0)
-        time.sleep(0.5)
-        
-
-
-    return banner_image
-
+# 中英文文字切換
+def translate_text(text_en, text_zh):
+    return text_zh if language == 'zh' else text_en
 
 # Streamlit App
 def main():
+    global language
+
     st.set_page_config(layout='wide', initial_sidebar_state='expanded')
 
-    st.title("Banner Generator")
+    set_language()
 
-    uploaded_file = st.file_uploader("Upload Image", type=['jpg', 'jpeg', 'png'])
-    col1,col2 = st.columns([3,7])
-    if uploaded_file is not None:
-        banner_width = 1500
-        banner_height = 500
-        with col1:
-            # Add a selectbox for processing options
-            processing_option = st.selectbox("Choose Processing Option", ("default", "customize"))
+    st.title(translate_text("Banner Generator", "橫幅生成器"))
 
-            if processing_option == "customize":
-                with st.expander("Remove Background Setting"):
-                    # Add sliders for custom settings
+    uploaded_file = st.file_uploader(translate_text("Upload Image", "上傳圖片"), type=['jpg', 'jpeg', 'png'])
+    col1, col2 = st.columns([3, 7])
+    with col1:
+        form = st.form("processing_form")
+        if uploaded_file is not None:
+            # 添加選擇框來選擇處理選項
+            processing_option = form.selectbox(translate_text("Choose Processing Option", "選擇處理選項"), ("預設", "自定義"))
+
+            if processing_option == "自定義":
+                # 添加滑動條以進行自定義設置
+                with st.expander(translate_text("Remove Background Setting", "移除背景設置")):
                     alpha_matting_custom = {
-                        "foreground_threshold": st.slider("Alpha Matting Foreground Threshold", 0, 20, 9),
-                        "background_threshold": st.slider("Alpha Matting Background Threshold", 0, 20, 3),
-                        "erode_size": st.slider("Alpha Matting Erode Size", 0, 50, 17)
+                        "foreground_threshold": form.slider(translate_text("Alpha Matting Foreground Threshold", "Alpha Matting 前景閾值"), 0, 20, 9),
+                        "background_threshold": form.slider(translate_text("Alpha Matting Background Threshold", "Alpha Matting 背景閾值"), 0, 20, 3),
+                        "erode_size": form.slider(translate_text("Alpha Matting Erode Size", "Alpha Matting 侵蝕大小"), 0, 50, 17)
                     }
             else:
                 alpha_matting_custom = None
-            with st.expander("Banner Setting"):
+            with st.expander(translate_text("Banner Setting", "Banner 設置")):
                 # 指定背景顏色
-                background_color = st.color_picker("Choose Background Color", "#ffffff")
+                background_color = form.color_picker(translate_text("Choose Background Color", "選擇背景顏色"), "#ffffff")
                 # 指定圖片位置
-                banner_width = st.slider("Banner Width", 100, 1500, 1500)
-                banner_height = st.slider("Banner Height", 100, 500, 500)
+                banner_width = form.slider(translate_text("Banner Width", "Banner 寬度"), 100, 1500, 1500)
+                banner_height = form.slider(translate_text("Banner Height", "Banner 高度"), 100, 500, 500)
 
-            with st.expander("Image Setting"):
+            with st.expander(translate_text("Image Setting", "圖片設置")):
                 # 根據banner_size調整position的最大值和最小值
-                position_x = st.slider("Image Position(X)", -banner_height, banner_width, 100)
-                position_y = st.slider("Image Position(Y)", -banner_height, banner_height, 50)
+                position_x = form.slider(translate_text("Image Position(X)", "圖片位置(X)"), -banner_height, banner_width, 100)
+                position_y = form.slider(translate_text("Image Position(Y)", "圖片位置(Y)"), -banner_height, banner_height, 50)
                 position = (position_x, -position_y)
 
-            with st.expander("Text Setting"):
+            with st.expander(translate_text("Text Setting", "文字設置")):
                 # 指定Banner文字
-                text = st.text_input("Input Banner Text", "Bitcoin Frogs")
+                text = form.text_input(translate_text("Input Banner Text", "輸入Banner文字"), "比特幣青蛙")
                 # 指定Banner文字顏色
-                text_color = st.color_picker("Text Color", "#ffffff")
+                text_color = form.color_picker(translate_text("Text Color", "文字顏色"), "#ffffff")
                 # 指定Banner文字大小
-                text_size = st.slider("Text Size", 8, 240, 120)
+                text_size = form.slider(translate_text("Text Size", "文字大小"), 8, 240, 120)
                 # 指定Banner文字位置
-                text_position_x = st.slider("Text Position(X)", -banner_width, banner_width, 0)
-                text_position_y = st.slider("Text Position(Y)", -banner_height, banner_height, 0)
+                text_position_x = form.slider(translate_text("Text Position(X)", "文字位置(X)"), -banner_width, banner_width, 0)
+                text_position_y = form.slider(translate_text("Text Position(Y)", "文字位置(Y)"), -banner_height, banner_height, 0)
                 text_position = (text_position_x, -text_position_y)
-        with col2:
+
+            submit_button = form.form_submit_button(translate_text("Apply Settings", "套用設置"))
+    with col2:
+        if uploaded_file is not None and submit_button:
             # 指定Banner尺寸
             banner_size = (banner_width, banner_height)
 
-            progress_placeholder = st.empty()
-
-            with st.spinner('Image processing, please wait...'):
-                # 处理图片并显示进度
+            with st.spinner(translate_text('Image processing, please wait...', '正在處理圖片，請稍候...')):
+                # 處理圖片並顯示進度
                 # 生成Banner圖片
-                banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_custom, progress_placeholder)
+                banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_custom)
 
             # 顯示Banner圖片
             st.image(banner_image)
@@ -118,9 +98,9 @@ def main():
             buffered = BytesIO()
             banner_image.save(buffered, format="PNG")
             img_str = base64.b64encode(buffered.getvalue()).decode()
-            href = f'<a href="data:file/png;base64,{img_str}" download="banner.png">Click to Download</a>'
+            download_text = translate_text("Click to Download", "點擊下載")
+            href = f'<a href="data:file/png;base64,{img_str}" download="banner.png">{download_text}</a>'
             st.markdown(href, unsafe_allow_html=True)
-
 
 if __name__ == "__main__":
     main()
