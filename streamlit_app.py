@@ -31,7 +31,7 @@ def translate_text(text_en, text_zh):
     return text_zh if language == '中文' else text_en
 
 
-
+@st.cache(max_entries=128)
 def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_custom):
     image = Image.open(upload)
 
