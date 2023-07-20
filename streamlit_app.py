@@ -12,7 +12,7 @@ def fix_image(upload,scale_ratio, position, background_color, text, banner_size,
     fixed = remove(image, alpha_matting=True, alpha_matting_foreground_threshold=9, alpha_matting_background_threshold=3, alpha_matting_erode_size=17)
 
     # 縮放fixed圖像至banner尺寸並保持比例
-    fixed.thumbnail(banner_size)
+    #fixed.thumbnail(banner_size)
      # Resize the image proportionally based on the scale_ratio
     new_width = int(fixed.width * scale_ratio)
     new_height = int(fixed.height * scale_ratio)
