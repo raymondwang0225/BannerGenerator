@@ -7,7 +7,7 @@ from PIL import ImageDraw, ImageFont
 import time
 import asyncio
 
-def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position, progress):
+def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position,progress):
     image = Image.open(upload)
     fixed = remove(image, alpha_matting=True, alpha_matting_foreground_threshold=9, alpha_matting_background_threshold=3, alpha_matting_erode_size=17)
 
@@ -26,12 +26,13 @@ def fix_image(upload, position, background_color, text, banner_size, text_size, 
     text_position_y = text_position[1] - text_height / 2
     draw.text((text_position_x, text_position_y), text, fill=text_color, font=font)
 
-    # 模拟图片处理过程
+     # 模拟图片处理过程
     for i in range(1, 6):
         progress.progress(i * 20)  # 更新进度条，每次增加20%
         time.sleep(1)
 
     return banner_image
+
 
 # Streamlit App
 def main():
@@ -67,7 +68,7 @@ def main():
         st.subheader("Text")
         # 指定Banner文字
         text = st.text_input("Input Banner Text")
-        # 指定Banner文字顏色
+            # 指定Banner文字顏色
         text_color = st.color_picker("Text Color", "#000000")
 
         # 指定Banner文字大小
@@ -81,24 +82,27 @@ def main():
         # 指定Banner尺寸
         banner_size = (banner_width, banner_height)
 
-        # 按钮，只有按下按钮时才执行处理过程
-        if st.button("Generate"):
-            progress_placeholder = st.empty()
-            
-            with st.spinner('图片处理中，请稍候...'):
-                # 处理图片并显示进度
-                # 使用st.block_until_complete装饰器来阻塞用户输入
-                asyncio.run(st.block_until_complete(fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, progress_placeholder)))
-                
-            # 顯示Banner圖片
-            st.image(banner_image)
+        
 
-            # 下載完成的圖片
-            buffered = BytesIO()
-            banner_image.save(buffered, format="PNG")
-            img_str = base64.b64encode(buffered.getvalue()).decode()
-            href = f'<a href="data:file/png;base64,{img_str}" download="banner.png">Click to Download</a>'
-            st.markdown(href, unsafe_allow_html=True)
+        
+
+        progress_placeholder = st.empty()
+        
+        with st.spinner('图片处理中，请稍候...'):
+            # 处理图片并显示进度
+            # 生成Banner圖片
+            banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position,progress_placeholder)
+            asyncio.run(st.block_until_complete(banner_image))
+        # 顯示Banner圖片
+        st.image(banner_image)
+
+        # 下載完成的圖片
+        buffered = BytesIO()
+        banner_image.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+        href = f'<a href="data:file/png;base64,{img_str}" download="banner.png">Click to Download</a>'
+        st.markdown(href, unsafe_allow_html=True)
+
 
 if __name__ == "__main__":
     main()
