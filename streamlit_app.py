@@ -33,38 +33,42 @@ def translate_text(text_en, text_zh):
 
 @st.cache(max_entries=128)
 def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_custom):
-    image = Image.open(upload)
+    try:
+        image = Image.open(upload)
 
-    if alpha_matting_custom:
-        # 使用自定义参数来处理图像
-        fixed = remove(
-            image,
-            alpha_matting=True,
-            alpha_matting_foreground_threshold=alpha_matting_custom["foreground_threshold"],
-            alpha_matting_background_threshold=alpha_matting_custom["background_threshold"],
-            alpha_matting_erode_size=alpha_matting_custom["erode_size"]
-        )
-    else:
-        # 使用预设参数来处理图像
-        fixed = remove(image)
+        if alpha_matting_custom:
+            # 使用自定义参数来处理图像
+            fixed = remove(
+                image,
+                alpha_matting=True,
+                alpha_matting_foreground_threshold=alpha_matting_custom["foreground_threshold"],
+                alpha_matting_background_threshold=alpha_matting_custom["background_threshold"],
+                alpha_matting_erode_size=alpha_matting_custom["erode_size"]
+            )
+        else:
+            # 使用预设参数来处理图像
+            fixed = remove(image)
 
-    # 缩放fixed图像至banner尺寸并保持比例
-    fixed.thumbnail(banner_size)
+        # 缩放fixed图像至banner尺寸并保持比例
+        fixed.thumbnail(banner_size)
 
-    # 创建 Banner 图片
-    banner_image = Image.new('RGBA', banner_size, background_color)
-    banner_image.paste(fixed, position, fixed)
+        # 创建 Banner 图片
+        banner_image = Image.new('RGBA', banner_size, background_color)
+        banner_image.paste(fixed, position, fixed)
 
-    # 在 Banner 图片上添加文字
-    draw = ImageDraw.Draw(banner_image)
-    font = ImageFont.truetype("Pixels.ttf", text_size)
-    text_width, text_height = draw.textsize(text, font=font)
-    text_position_x = text_position[0] - text_width / 2
-    text_position_y = text_position[1] - text_height / 2
-    draw.text((text_position_x, text_position_y), text, fill=text_color, font=font)
-
-    return banner_image
-
+        # 在 Banner 图片上添加文字
+        draw = ImageDraw.Draw(banner_image)
+        font = ImageFont.truetype("Pixels.ttf", text_size)
+        text_width, text_height = draw.textsize(text, font=font)
+        text_position_x = text_position[0] - text_width / 2
+        text_position_y = text_position[1] - text_height / 2
+        draw.text((text_position_x, text_position_y), text, fill=text_color, font=font)
+        
+        return banner_image
+    
+    except Exception as e:
+        st.error(f"Error occurred: {e}")
+        return None
 
 
 
