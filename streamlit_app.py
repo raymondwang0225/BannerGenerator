@@ -7,12 +7,10 @@ from PIL import ImageDraw, ImageFont
 import time
 
 
-def fix_image(option,upload, position, background_color, text, banner_size, text_size, text_color, text_position,alpha_matting_foreground_threshold=9, alpha_matting_background_threshold=3, alpha_matting_erode_size=17,progress=None):
+def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position,alpha_matting_foreground_threshold, alpha_matting_background_threshold, alpha_matting_erode_size,progress):
     image = Image.open(upload)
-    if option is "Customized":
-        fixed = remove(image, alpha_matting=True, alpha_matting_foreground_threshold=alpha_matting_foreground_threshold, alpha_matting_background_threshold=alpha_matting_background_threshold, alpha_matting_erode_size=alpha_matting_erode_size)
-    else:
-        fixed = remove(image)
+    fixed = remove(image, alpha_matting=True, alpha_matting_foreground_threshold=alpha_matting_foreground_threshold, alpha_matting_background_threshold=alpha_matting_background_threshold, alpha_matting_erode_size=alpha_matting_erode_size)
+
     # 縮放fixed圖像至banner尺寸並保持比例
     fixed.thumbnail(banner_size)
 
@@ -53,8 +51,6 @@ def main():
 
     uploaded_file = st.file_uploader("Upload Image", type=['jpg', 'jpeg', 'png'])
 
-    
-
     if uploaded_file is not None:
         with st.expander("Banner Setting"):
             #st.sidebar.subheader("Banner")
@@ -94,24 +90,19 @@ def main():
         
 
         progress_placeholder = st.empty()
-
-        option = st.selectbox(
-            'Remove Background Function',
-            ('Default', 'Customized'))
-        if option is 'Customized':
-            # 調整透明度分割的相關參數
-            alpha_matting_foreground_threshold = st.slider("Foreground Threshold", 0, 255, 9)
-            alpha_matting_background_threshold = st.slider("Background Threshold", 0, 255, 3)
-            alpha_matting_erode_size = st.slider("Erode Size", 0, 50, 17)
         
         with st.spinner('Image processing, please wait...'):
             # 处理图片并显示进度
             # 生成Banner圖片
-            banner_image = fix_image(option,uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_foreground_threshold, alpha_matting_background_threshold, alpha_matting_erode_size,progress=progress_placeholder)
+            banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_foreground_threshold, alpha_matting_background_threshold, alpha_matting_erode_size,progress_placeholder)
         # 顯示Banner圖片
         st.image(banner_image)
 
-        
+        with st.expander("Customized Setting"):
+            # 調整透明度分割的相關參數
+            alpha_matting_foreground_threshold = st.slider("Foreground Threshold", 0, 255, 270)
+            alpha_matting_background_threshold = st.slider("Background Threshold", 0, 255, 20)
+            alpha_matting_erode_size = st.slider("Erode Size", 0, 50, 11)
 
         # 下載完成的圖片
         buffered = BytesIO()
