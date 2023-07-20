@@ -111,7 +111,7 @@ def main():
                 alpha_matting_custom = None
             with st.expander(translate_text("Banner Setting", "Banner设置")):
                 # 指定背景颜色
-                background_color = st.color_picker(translate_text("Choose Background Color", "选择背景颜色"), "#ffffff")
+                background_color = st.color_picker(translate_text("Choose Background Color", "选择背景颜色"), "#f6931a")
                 # 指定图片位置
                 banner_width = st.slider(translate_text("Banner Width", "Banner宽度"), 100, 1500, 1500)
                 banner_height = st.slider(translate_text("Banner Height", "Banner高度"), 100, 500, 500)
@@ -119,7 +119,7 @@ def main():
             with st.expander(translate_text("Image Setting", "图片设置")):
                 # 根据banner_size调整position的最大值和最小值
                 position_x = st.slider(translate_text("Image Position(X)", "图片位置(X)"), -banner_height, banner_width, 100)
-                position_y = st.slider(translate_text("Image Position(Y)", "图片位置(Y)"), -banner_height, banner_height, 50)
+                position_y = st.slider(translate_text("Image Position(Y)", "图片位置(Y)"), -banner_height, banner_height, 0)
                 position = (position_x, -position_y)
 
             with st.expander(translate_text("Text Setting", "文字设置")):
@@ -130,8 +130,8 @@ def main():
                 # 指定Banner文字大小
                 text_size = st.slider(translate_text("Text Size", "文字大小"), 8, 240, 120)
                 # 指定Banner文字位置
-                text_position_x = st.slider(translate_text("Text Position(X)", "文字位置(X)"), -banner_width, banner_width, 0)
-                text_position_y = st.slider(translate_text("Text Position(Y)", "文字位置(Y)"), -banner_height, banner_height, 0)
+                text_position_x = st.slider(translate_text("Text Position(X)", "文字位置(X)"), -banner_width, banner_width, 1000)
+                text_position_y = st.slider(translate_text("Text Position(Y)", "文字位置(Y)"), -banner_height, banner_height, -200)
                 text_position = (text_position_x, -text_position_y)
 
             
