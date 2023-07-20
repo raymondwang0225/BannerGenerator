@@ -32,7 +32,7 @@ def translate_text(text_en, text_zh):
 
 
 
-def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_custom, progress):
+def fix_image(upload, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_custom):
     image = Image.open(upload)
 
     if alpha_matting_custom:
