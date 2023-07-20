@@ -21,7 +21,7 @@ def set_language():
     # st.write("当前语言：" + ("中文" if language == "zh" else "English"))
 
     # 使用 st.selectbox 来选择语言
-    selected_language = st.selectbox(translate_text("选择语言", "Select Language"), ("English", "中文"))
+    selected_language = st.selectbox(translate_text("Select Language","选择语言"), ("English", "中文"))
 
     if selected_language != language:
         switch_language(selected_language)
