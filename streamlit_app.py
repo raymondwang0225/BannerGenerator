@@ -27,8 +27,8 @@ def fix_image(upload, position, background_color, text, banner_size, text_size, 
     draw.text((text_position_x, text_position_y), text, fill=text_color, font=font)
 
      # 模拟图片处理过程
-    for i in range(1, 11):
-        progress.progress(i * 10)  # 更新进度条，每次增加20%
+    for i in range(1, 6):
+        progress.progress(i * 20)  # 更新进度条，每次增加20%
         time.sleep(0.5)
 
     return banner_image
@@ -52,32 +52,35 @@ def main():
     uploaded_file = st.file_uploader("Upload Image", type=['jpg', 'jpeg', 'png'])
 
     if uploaded_file is not None:
-        st.sidebar.subheader("Banner")
-        # 指定背景顏色
-        background_color = st.sidebar.color_picker("Choose Background Color", "#ffffff")
-        # 指定圖片位置
-        banner_width = st.sidebar.slider("Banner Width", 100, 1000, 500)
-        banner_height = st.sidebar.slider("Banner Height", 100, 1000, 200)
+        with st.expander("Banner Setting"):
+            #st.sidebar.subheader("Banner")
+            # 指定背景顏色
+            background_color = st.sidebar.color_picker("Choose Background Color", "#ffffff")
+            # 指定圖片位置
+            banner_width = st.sidebar.slider("Banner Width", 100, 1500, 1500)
+            banner_height = st.sidebar.slider("Banner Height", 100, 500, 500)
         
-        st.sidebar.subheader("Image")
-        # 根據banner_size調整position的最大值和最小值
-        position_x = st.sidebar.slider("Image Position(X)", -banner_height, banner_width, 100)
-        position_y = st.sidebar.slider("Image Position(Y)", -banner_height, banner_height, 50)
-        position = (position_x, -position_y)
+        with st.expander("Image Setting"):
+            #st.sidebar.subheader("Image")
+            # 根據banner_size調整position的最大值和最小值
+            position_x = st.sidebar.slider("Image Position(X)", -banner_height, banner_width, 100)
+            position_y = st.sidebar.slider("Image Position(Y)", -banner_height, banner_height, 50)
+            position = (position_x, -position_y)
 
-        st.sidebar.subheader("Text")
-        # 指定Banner文字
-        text = st.sidebar.text_input("Input Banner Text")
+        with st.expander("Text Setting"):
+            #st.sidebar.subheader("Text")
+            # 指定Banner文字
+            text = st.sidebar.text_input("Input Banner Text","Bitcoin Frogs")
             # 指定Banner文字顏色
-        text_color = st.sidebar.color_picker("Text Color", "#000000")
+            text_color = st.sidebar.color_picker("Text Color", "#ffffff")
 
-        # 指定Banner文字大小
-        text_size = st.sidebar.slider("Text Size", 8, 120, 24)
+            # 指定Banner文字大小
+            text_size = st.sidebar.slider("Text Size", 8, 240, 120)
 
-        # 指定Banner文字位置
-        text_position_x = st.sidebar.slider("Text Position(X)", -banner_width, banner_width, 0)
-        text_position_y = st.sidebar.slider("Text Position(Y)", -banner_height, banner_height, 0)
-        text_position = (text_position_x, -text_position_y)
+            # 指定Banner文字位置
+            text_position_x = st.sidebar.slider("Text Position(X)", -banner_width, banner_width, 0)
+            text_position_y = st.sidebar.slider("Text Position(Y)", -banner_height, banner_height, 0)
+            text_position = (text_position_x, -text_position_y)
 
         # 指定Banner尺寸
         banner_size = (banner_width, banner_height)
@@ -88,7 +91,7 @@ def main():
 
         progress_placeholder = st.empty()
         
-        with st.spinner('图片处理中，请稍候...'):
+        with st.spinner('Image processing, please wait...'):
             # 处理图片并显示进度
             # 生成Banner圖片
             banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position,progress_placeholder)
