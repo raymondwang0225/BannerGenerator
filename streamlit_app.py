@@ -38,6 +38,15 @@ def fix_image(upload, position, background_color, text, banner_size, text_size, 
     text_position_y = text_position[1] - text_height / 2
     draw.text((text_position_x, text_position_y), text, fill=text_color, font=font)
 
+
+    # 模拟图片处理过程
+    for i in range(1, 6):
+        progress.progress(i * 20)  # 更新进度条，每次增加20%
+        time.sleep(0.5)
+        if i==5:
+            progress = st.empty()
+
+
     return banner_image
 
 
