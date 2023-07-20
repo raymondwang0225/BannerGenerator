@@ -140,10 +140,10 @@ def main():
             # 指定Banner尺寸
             banner_size = (banner_width, banner_height)
 
-            with st.spinner(translate_text('Image processing, please wait...', '图像处理中，请稍候...')):
+            #with st.spinner(translate_text('Image processing, please wait...', '图像处理中，请稍候...')):
                 # 处理图像并显示进度
                 # 生成Banner图像
-                banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_custom)
+            banner_image = fix_image(uploaded_file, position, background_color, text, banner_size, text_size, text_color, text_position, alpha_matting_custom)
 
             # 显示Banner图像
             st.image(banner_image)
