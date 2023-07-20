@@ -42,9 +42,10 @@ def fix_image(upload, position, background_color, text, banner_size, text_size, 
     # 模拟图片处理过程
     for i in range(1, 6):
         progress.progress(i * 20)  # 更新进度条，每次增加20%
-        time.sleep(0.5)
         if i==5:
-            progress = st.empty()
+            progress.progress(0)
+        time.sleep(0.5)
+        
 
 
     return banner_image
