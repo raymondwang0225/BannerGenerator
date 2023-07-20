@@ -82,16 +82,19 @@ def main():
             </style>
             """
     st.markdown(hide_st_style, unsafe_allow_html=True)
-
     
+    scol1, scol2 = st.columns([3, 7])
+    with scol1:
+        set_language()
+    
+
+    st.title(translate_text("Banner Generator", "横幅生成器"))
+    uploaded_file = st.file_uploader(translate_text("Upload Image", "上载图像"), type=['jpg', 'jpeg', 'png'])
+
+
     col1, col2 = st.columns([3, 7])
     with col1:
-        scol1, scol2 = st.columns([4, 6])
-        with scol1:
-            set_language()
-        st.title(translate_text("Banner Generator", "横幅生成器"))
-        uploaded_file = st.file_uploader(translate_text("Upload Image", "上载图像"), type=['jpg', 'jpeg', 'png'])
-
+        
         if uploaded_file is not None:
             # 添加选择框来选择处理选项
             processing_option = st.selectbox(translate_text("Choose Processing Option", "选择处理选项"), (translate_text("Default", "预设"), translate_text("Custom", "自定义")))
